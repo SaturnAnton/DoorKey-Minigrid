@@ -22,7 +22,7 @@ obs, info = env.reset()
 s = get_state_key(obs)
 done = False
 
-q_table = load("test.pkl")
+q_table = load_file("qtable10.pkl")
 
 while not done:
     # Durante il test usiamo solo l'azione migliore (argmax), niente epsilon

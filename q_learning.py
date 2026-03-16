@@ -6,17 +6,17 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 
-env = gym.make("MiniGrid-DoorKey-5x5-v0")
+env = gym.make("MiniGrid-DoorKey-5x5-v0",max_steps = 500)
 
-episodes = 1000  # EPISODI = numero di tentativi che l'agente fa per imparare
-alpha = 0.1      # LEARNING RATE = velocità di apprendimento. Minore è il valore, maggiore è la memoria storica
-gamma = 0.99     # DISCOUNT FACTOR = valore che indica quanto l'agente ci tiene al futuro
-epsilon = 0.8    # EPSILON = probabilità di eseguire una mossa casuale
+EPISODES = 5000  # EPISODI = numero di tentativi che l'agente fa per imparare
+ALPHA = 0.1      # LEARNING RATE = velocità di apprendimento. Minore è il valore, maggiore è la memoria storica
+GAMMA = 0.99     # DISCOUNT FACTOR = valore che indica quanto l'agente ci tiene al futuro
+EPSILON = 1.0   # EPSILON = probabilità di eseguire una mossa casuale
 
 def save_file(q):
     dict(**q)
     os.makedirs("q_table", exist_ok=True)
-    filepath = os.path.join("q_table", "test.pkl")
+    filepath = os.path.join("q_table", "qtable10.pkl")
     with open(filepath, "wb") as file:
         pickle.dump(dict(**q), file)
 
@@ -86,7 +86,7 @@ def q_learning(environment, episodes, alpha, gamma, expl_func, expl_param):
         rews[i] = rewards
         lengths[i] = step
         if(expl_param > 0.1):
-            expl_param = expl_param * 0.99
+            expl_param = expl_param * 0.995
     
 
         print (f"siamo al {i} episodio")
@@ -94,7 +94,7 @@ def q_learning(environment, episodes, alpha, gamma, expl_func, expl_param):
     return q, rews, lengths
 
 
-sol, rews, lengths = q_learning(env, episodes, alpha, gamma, epsilon_greedy, epsilon)
+sol, rews, lengths = q_learning(env, EPISODES, ALPHA, GAMMA, epsilon_greedy, EPSILON)
 print("Fine")
 
 # Creiamo un grafico con due "sotto-grafici"
