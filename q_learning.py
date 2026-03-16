@@ -66,8 +66,6 @@ def q_learning(environment, episodes, alpha, gamma, expl_func, expl_param):
             # L'azione scelta viene eseguita nell'ambiente
             obs_next, r, terminated, truncated, _ = environment.step(a)
             s1 = get_state_key(obs_next)
-            if(terminated):
-                print("Obiettivo raggiunto")
             done = terminated or truncated
 
             custom_reward = r
@@ -88,12 +86,9 @@ def q_learning(environment, episodes, alpha, gamma, expl_func, expl_param):
         if(expl_param > 0.1):
             expl_param = expl_param * 0.995
     
-
-        print (f"siamo al {i} episodio")
-
     return q, rews, lengths
 
-
+print("Inizio del training...")
 sol, rews, lengths = q_learning(env, EPISODES, ALPHA, GAMMA, epsilon_greedy, EPSILON)
 print("Fine")
 

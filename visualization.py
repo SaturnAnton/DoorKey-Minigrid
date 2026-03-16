@@ -25,7 +25,6 @@ done = False
 q_table = load_file("qtable10.pkl")
 
 while not done:
-    # Durante il test usiamo solo l'azione migliore (argmax), niente epsilon
     a = np.argmax(q_table[s])
     
     obs, r, terminated, truncated, info = env.step(a)
