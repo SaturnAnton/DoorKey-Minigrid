@@ -1,1 +1,1 @@
-# DoorKey-Minigrid_Q-Learning
+# Q-Learning in MiniGrid DoorKey Environment
