@@ -4,6 +4,7 @@ from collections import defaultdict
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
+import os
 
 env = gym.make("MiniGrid-DoorKey-5x5-v0")
 
@@ -14,7 +15,9 @@ epsilon = 0.8    # EPSILON = probabilità di eseguire una mossa casuale
 
 def save_file(q):
     dict(**q)
-    with open("test.pkl", "wb") as file:
+    os.makedirs("q_table", exist_ok=True)
+    filepath = os.path.join("q_table", "test.pkl")
+    with open(filepath, "wb") as file:
         pickle.dump(dict(**q), file)
 
 # Funzione che unisce l'immagine e la direzione trasformandole in una tupla
@@ -118,7 +121,3 @@ plt.show()
 
 save_file(sol)
 
-#5 training da 5000
-#fare una funzione per salvare la qtable di questi training passando la soluzione
-
-#fai una prova con 100 episodi

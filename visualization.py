@@ -2,10 +2,12 @@ import pickle
 import gymnasium as gym
 from minigrid.wrappers import *
 import numpy as np
-import time 
+import time
+import os
 
-def load(filename):
-    with open(filename,"rb") as handle:
+def load_file(filename):
+    filepath = os.path.join("q_table",filename)
+    with open(filepath,"rb") as handle:
         qtable = pickle.load(handle)
     return qtable
 
