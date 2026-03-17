@@ -6,7 +6,7 @@ import time
 import os
 
 def load_file(filename):
-    filepath = os.path.join("q_table",filename)
+    filepath = os.path.join("sarsa",filename)
     with open(filepath,"rb") as handle:
         qtable = pickle.load(handle)
     return qtable
@@ -22,7 +22,7 @@ obs, info = env.reset()
 s = get_state_key(obs)
 done = False
 
-q_table = load_file("qtable10.pkl")
+q_table = load_file("sarsa3.pkl")
 
 while not done:
     a = np.argmax(q_table[s])

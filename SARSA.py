@@ -16,7 +16,7 @@ EPSILON = 0.9
 def save_file(q):
     dict(**q)
     os.makedirs("sarsa", exist_ok=True)
-    filepath = os.path.join("sarsa", "sarsa2.pkl")
+    filepath = os.path.join("sarsa", "sarsa5.pkl")
     with open(filepath, "wb") as file:
         pickle.dump(dict(**q), file)
 
@@ -72,6 +72,7 @@ def sarsa(environment, episodes, alpha, gamma, expl_func, expl_param):
 
         rews[i] = rewards
         lengths[i] = step
+        
         if(expl_param > 0.1):
             expl_param = expl_param * 0.995
 
