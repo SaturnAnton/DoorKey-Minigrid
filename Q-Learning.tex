@@ -113,42 +113,38 @@ Repeat (for each episode):
 \end{lstlisting}
 
 \subsection{Esplorazione vs Sfruttamento}
-Un problema fondamentale nel reinforcement learning è il trade-off tra
-\textbf{esplorazione} e \textbf{sfruttamento}:
-\begin{itemize}
-  \item \textbf{Esplorazione}: consiste nel provare nuove azioni per scoprire
-    nuove strategie che potrebbero portare a ricompense maggiori in futuro.
 
-  \item \textbf{Sfruttamento}: consiste nel scegliere le azioni che si conoscono
-    per massimizzare la ricompensa immediata.
-\end{itemize}
-La scelta dipende dal contesto e dall'obiettivo dell'agente.
-Ci sono due approcci principali:
+Un pilastro fondamentale del Reinforcement Learning è il delicato compromesso tra \textbf{esplorazione} (exploration) e \textbf{sfruttamento} (exploitation):
+
 \begin{itemize}
-  \item \textbf{\( \varepsilon \)-greedy}:
-    La politica \( \varepsilon\)-greedy sceglie l'azione migliore di sempre, ma ogni tanto
-    (con probabilità \( \varepsilon \)) sceglie un'azione a caso. Questo metodo è off-policy.
-  \item \textbf{Softmax} (o Boltzmann):
-    Si sceglie un'azione in base ad una distribuzione di probabilità:
+  \item \textbf{Esplorazione}: L'agente sacrifica il guadagno immediato per raccogliere informazioni che potrebbero portare a profitti molto più alti in futuro.
+  \item \textbf{Sfruttamento}: L'agente sceglie le azioni che hanno dato buoni risultati in passato per ottenere ricompense immediate e sicure.
+\end{itemize}
+
+Per garantire la convergenza ad un risultato ottimo, è necessario esplorare tutte le coppie stato-azione con sufficiente frequenza nel lungo periodo. I principali metodi utilizzati nella pratica sono:
+
+\begin{itemize}
+  \item \textbf{\( \varepsilon \)-greedy}: 
+    Scegliere l'azione in modo avido (\textit{greedy}) per la maggior parte del tempo (con probabilità \( 1 - \varepsilon \)) e selezionare un'azione in modo casuale con probabilità \( \varepsilon \).
+  \item \textbf{Softmax (o Boltzmann)}: 
+    tratta tutte le azioni esplorative allo stesso modo.Questo metodo assegna una probabilità di selezione a ciascuna azione ponderandola in base al suo valore atteso \( Q(s,a) \).\\
+    La probabilità di scegliere l'azione \( a \) nello stato \( s \) è definita come:
     \[
       p(a) = \frac{e^{Q(s,a)/T}}{\sum_{a'} e^{Q(s,a')/T}}
-    \]\\
-
-    T è il parametro di temperatura che controlla il livello di esplorazione:
+    \]
+    Il parametro \( T \), noto come \textit{temperatura}, agisce da modulatore cruciale per il grado di esplorazione:
     \begin{itemize}
-      \item Quando la "temperatura" \( T \) è alta, tutte le azioni hanno probabilità simili
-        di essere scelte (si esplora di più)
-      \item Quando la temperatura \( T \) è bassa, l'azione con il valore \( Q(s,a) \)
-        più alto ha una probabilità maggiore di essere scelta (si sfrutta di più)
+      \item Quando T presenta un valore elevato,tutte le azioni hanno probabilità simili di essere estratte (\textbf{massima esplorazione}).
+      \item Quando T presenta un valore basso, l'azione con il valore \( Q(s,a) \) più alto ha una probabilità maggiore di essere scelta (\textbf{massimo sfruttamento}).
     \end{itemize}
 \end{itemize}
 
 \subsection{Spiegazione dei parametri}
 \begin{itemize}
     \item \textbf{EPISODI:} Sequenze complete di interazioni agente-ambiente, dall'inizio fino allo stato terminale (goal) o al raggiungimento del limite massimo di passi (\texttt{max\_steps}).
-    \item \textbf{\(\alpha\) - LEARNING RATE:} Parametro che determina il peso delle nuove informazioni rispetto a quelle passate; regola la velocità di aggiornamento dei valori nella Q-table.
+    \item \textbf{\(\alpha\) - LEARNING RATE:} Determina il peso delle nuove informazioni rispetto a quelle passate. Regola la velocità di aggiornamento dei valori nella Q-table.
     \item \textbf{\(\gamma\) - DISCOUNT FACTOR:} Fattore che definisce l'importanza delle ricompense future; un valore vicino a 1 orienta l'agente verso una strategia di lungo periodo.
-    \item \textbf{\(\epsilon\) - EXPLORATION RATE:} Probabilità di scegliere un'azione casuale invece di quella ottimale stimata; fondamentale per esplorare l'ambiente.
+    \item \textbf{\(\varepsilon\) - EXPLORATION RATE:} Probabilità di scegliere un'azione casuale invece di quella ottimale stimata; fondamentale per esplorare l'ambiente.
 \end{itemize}
 
 \section{AMBIENTE DOORKEY}
@@ -162,7 +158,6 @@ Per valutare le performance dell’agente è stato scelto l’ambiente DoorKey, 
     \item 0 se fallisce.
 \end{itemize}
 
-\vspace{1em}
 L'episodio termina quando si verifica una delle seguenti condizioni:
 
 \begin{itemize}
@@ -171,7 +166,7 @@ L'episodio termina quando si verifica una delle seguenti condizioni:
 \end{itemize}
 
 \subsubsection{Spazio delle Azioni}
-Le azioni possibili all'interno di questo ambiente sono 7, identificate da un valore numerico:
+Le azioni possibili all'interno di questo ambiente sono 7, identificate da un numero:
 
 \begin{enumerate}
     \item \textbf{LEFT (0):} ruotare a sinistra.
@@ -186,7 +181,7 @@ Le azioni possibili all'interno di questo ambiente sono 7, identificate da un va
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.4\textwidth]{figure/env.png}
+    \includegraphics[width=0.36\textwidth]{figure/env.png}
     \caption{Esempio dell'ambiente DoorKey.}
     \label{fig:doorkey_example}
 \end{figure}
