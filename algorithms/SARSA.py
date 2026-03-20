@@ -6,17 +6,19 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 
-env = gym.make("MiniGrid-DoorKey-5x5-v0")
+env = gym.make("MiniGrid-DoorKey-5x5-v0",max_steps = 500)
 
 EPISODES = 5000
 ALPHA = 0.1
 GAMMA = 0.99
-EPSILON = 0.9
+EPSILON = 1.0
+TEMP = 1.0
 
 def save_file(q):
     dict(**q)
-    os.makedirs("sarsa", exist_ok=True)
-    filepath = os.path.join("sarsa", "sarsa5.pkl")
+    folder_path = os.path.join("..","data", "sarsa")
+    os.makedirs(folder_path, exist_ok=True)
+    filepath = os.path.join(folder_path, "sarsa15.pkl")
     with open(filepath, "wb") as file:
         pickle.dump(dict(**q), file)
 
@@ -37,6 +39,10 @@ def epsilon_greedy(q, state, epsilon, n_actions):
         best_actions = [a for a in range(n_actions) if q_values[a] == max_val]
 
         return np.random.choice(best_actions)
+
+def softmax(q, state,temp,n_actions):
+    e = np.exp(q[state] / temp)
+    return np.random.choice(n_actions, p=e / e.sum())
     
 def sarsa(environment, episodes, alpha, gamma, expl_func, expl_param):
     n_actions = environment.action_space.n
@@ -81,7 +87,7 @@ def sarsa(environment, episodes, alpha, gamma, expl_func, expl_param):
     return q, rews, lengths
 
 print("Inizio del training...")
-sol, rews, lengths = sarsa(env, EPISODES, ALPHA, GAMMA, epsilon_greedy, EPSILON)
+sol, rews, lengths = sarsa(env, EPISODES, ALPHA, GAMMA, softmax, TEMP)
 print("Fine")
 
 # Creiamo un grafico con due "sotto-grafici"

@@ -15,8 +15,9 @@ EPSILON = 1.0   # EPSILON = probabilità di eseguire una mossa casuale
 
 def save_file(q):
     dict(**q)
-    os.makedirs("q_table", exist_ok=True)
-    filepath = os.path.join("q_table", "qtable10.pkl")
+    folder_path = os.path.join("..","data", "q_table")
+    os.makedirs(folder_path, exist_ok=True)
+    filepath = os.path.join(folder_path, "qtable10.pkl")
     with open(filepath, "wb") as file:
         pickle.dump(dict(**q), file)
 
