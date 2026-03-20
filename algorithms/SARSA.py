@@ -6,7 +6,7 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 
-env = gym.make("MiniGrid-DoorKey-5x5-v0",max_steps = 500)
+env = gym.make("MiniGrid-DoorKey-5x5-v0")
 
 EPISODES = 5000
 ALPHA = 0.1
@@ -18,7 +18,7 @@ def save_file(q):
     dict(**q)
     folder_path = os.path.join("..","data", "sarsa")
     os.makedirs(folder_path, exist_ok=True)
-    filepath = os.path.join(folder_path, "sarsa15.pkl")
+    filepath = os.path.join(folder_path, "sarsa20.pkl")
     with open(filepath, "wb") as file:
         pickle.dump(dict(**q), file)
 
