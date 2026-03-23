@@ -6,18 +6,19 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 
-env = gym.make("MiniGrid-DoorKey-5x5-v0",max_steps = 500)
+env = gym.make("MiniGrid-DoorKey-5x5-v0")
 
 EPISODES = 5000  # EPISODI = numero di tentativi che l'agente fa per imparare
 ALPHA = 0.1      # LEARNING RATE = velocità di apprendimento. Minore è il valore, maggiore è la memoria storica
 GAMMA = 0.99     # DISCOUNT FACTOR = valore che indica quanto l'agente ci tiene al futuro
 EPSILON = 1.0   # EPSILON = probabilità di eseguire una mossa casuale
+TEMP = 0.9
 
 def save_file(q):
     dict(**q)
     folder_path = os.path.join("..","data", "q_table")
     os.makedirs(folder_path, exist_ok=True)
-    filepath = os.path.join(folder_path, "qtable10.pkl")
+    filepath = os.path.join(folder_path, "qtable20.pkl")
     with open(filepath, "wb") as file:
         pickle.dump(dict(**q), file)
 
@@ -40,6 +41,9 @@ def epsilon_greedy(q, state, epsilon, n_actions):
 
         return np.random.choice(best_actions)
 
+def softmax(q, state,temp,n_actions):
+    e = np.exp(q[state] / temp)
+    return np.random.choice(n_actions, p=e / e.sum())
 
 def q_learning(environment, episodes, alpha, gamma, expl_func, expl_param):
     # Numero totale di azioni disponibili nell'environment
@@ -68,6 +72,8 @@ def q_learning(environment, episodes, alpha, gamma, expl_func, expl_param):
             obs_next, r, terminated, truncated, _ = environment.step(a)
             s1 = get_state_key(obs_next)
             done = terminated or truncated
+            if(terminated):
+                print("Risultato ottenuto")
 
             custom_reward = r
 
@@ -86,11 +92,13 @@ def q_learning(environment, episodes, alpha, gamma, expl_func, expl_param):
         lengths[i] = step
         if(expl_param > 0.1):
             expl_param = expl_param * 0.995
+
+        print(f"Episodio {i}")
     
     return q, rews, lengths
 
 print("Inizio del training...")
-sol, rews, lengths = q_learning(env, EPISODES, ALPHA, GAMMA, epsilon_greedy, EPSILON)
+sol, rews, lengths = q_learning(env, EPISODES, ALPHA, GAMMA, softmax, TEMP)
 print("Fine")
 
 # Creiamo un grafico con due "sotto-grafici"
