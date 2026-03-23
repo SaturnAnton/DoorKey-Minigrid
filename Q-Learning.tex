@@ -127,7 +127,7 @@ Per garantire la convergenza ad un risultato ottimo, è necessario esplorare tut
   \item \textbf{\( \varepsilon \)-greedy}: 
     Scegliere l'azione in modo avido (\textit{greedy}) per la maggior parte del tempo (con probabilità \( 1 - \varepsilon \)) e selezionare un'azione in modo casuale con probabilità \( \varepsilon \).
   \item \textbf{Softmax (o Boltzmann)}: 
-    tratta tutte le azioni esplorative allo stesso modo.Questo metodo assegna una probabilità di selezione a ciascuna azione ponderandola in base al suo valore atteso \( Q(s,a) \).\\
+    tratta tutte le azioni esplorative allo stesso modo. Questo metodo assegna una probabilità di selezione a ciascuna azione ponderandola in base al suo valore atteso \( Q(s,a) \).\\
     La probabilità di scegliere l'azione \( a \) nello stato \( s \) è definita come:
     \[
       p(a) = \frac{e^{Q(s,a)/T}}{\sum_{a'} e^{Q(s,a')/T}}
@@ -145,7 +145,10 @@ Per garantire la convergenza ad un risultato ottimo, è necessario esplorare tut
     \item \textbf{\(\alpha\) - LEARNING RATE:} Determina il peso delle nuove informazioni rispetto a quelle passate. Regola la velocità di aggiornamento dei valori nella Q-table.
     \item \textbf{\(\gamma\) - DISCOUNT FACTOR:} Fattore che definisce l'importanza delle ricompense future; un valore vicino a 1 orienta l'agente verso una strategia di lungo periodo.
     \item \textbf{\(\varepsilon\) - EXPLORATION RATE:} Probabilità di scegliere un'azione casuale invece di quella ottimale stimata; fondamentale per esplorare l'ambiente.
+    \item \textbf{\textit{TEMP} - TEMPERATURA:} Parametro che regola il grado di esplorazione nella strategia softmax, bilanciando l'estrazione casuale di azioni con la preferenza per quelle con valori Q più alti.
 \end{itemize}
+
+\pagebreak
 
 \section{AMBIENTE DOORKEY}
 
@@ -178,28 +181,19 @@ Le azioni possibili all'interno di questo ambiente sono 7, identificate da un nu
     \item \textbf{DONE (6):} terminazione volontaria.
 \end{enumerate}
 
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.36\textwidth]{figure/env.png}
-    \caption{Esempio dell'ambiente DoorKey.}
-    \label{fig:doorkey_example}
-\end{figure}
-
-
-
 \subsection{Scelta dell'algoritmo}
-Per l’addestramento dell’agente è stato impiegato l’algoritmo Q-Learning. Esso permette di stimare iterativamente la funzione di valore ottimo Q(s, a) senza necessitare di una conoscenza a priori delle dinamiche di transizione dell’ambiente. Grazie all’utilizzo di una policy di esplorazione (come l’$\epsilon$-greedy), l’agente è in grado di bilanciare la scoperta di nuove strategie con lo sfruttamento delle conoscenze già acquisite, un elemento cruciale per superare il problema delle ricompense sparse introdotto dalla meccanica della porta chiusa.
+Per l’addestramento dell’agente è stato impiegato l’algoritmo Q-Learning. Esso permette di stimare iterativamente la funzione di valore ottimo Q(s, a) senza necessitare di una conoscenza a priori delle dinamiche di transizione dell’ambiente. Grazie all’utilizzo di una policy di esplorazione (come l’$\epsilon$-greedy e Softmax), l’agente è in grado di bilanciare la scoperta di nuove strategie con lo sfruttamento delle conoscenze già acquisite, un elemento cruciale per superare il problema delle ricompense sparse introdotto dalla meccanica della porta chiusa.
 
 \subsection{Setup dell'Addestramento}
-La fase di addestramento è stata strutturata in due diverse configurazioni sperimentali per valutare l'impatto dei parametri esplorativi e della durata massima degli episodi sulle performance di convergenza dell'agente. Entrambi i set di esperimenti sono stati condotti per un totale di 5000 episodi, mantenendo costanti il learning rate ($\alpha$) e il fattore di sconto ($\gamma$).I test sono stati suddivisi come segue:
+La fase di addestramento è stata strutturata in due diverse configurazioni sperimentali per valutare l'impatto dei parametri esplorativi e della durata massima degli episodi sulle performance di convergenza dell'agente. Entrambi i set di esperimenti sono stati condotti per un totale di 5000 episodi, mantenendo costanti il learning rate ($\alpha$) e il fattore di sconto ($\gamma$). I test sono stati suddivisi come segue:
 
 \begin{itemize}
-    \item \textbf{Configurazione 1 (Run 1-5):} Parametri impostati con $\alpha = 0.1$, $\gamma = 0.99$ ed un tasso di esplorazione iniziale $\epsilon = 0.9$. Il limite massimo di passi per episodio (\texttt{max\_step}) è stato mantenuto al valore di default dell'ambiente, pari a $250$.
-    \item \textbf{Configurazione 2 (Run 6-10):} Parametri impostati con $\alpha = 0.1$, $\gamma = 0.99$. In questo caso, si è optato per una strategia di esplorazione iniziale più aggressiva, impostando $\epsilon = 1.0$. Inoltre, per concedere all'agente un orizzonte temporale più ampio per l'esplorazione casuale, il limite di passi è stato raddoppiato, portando il \texttt{max\_step} a $500$.
+    \item \textbf{Configurazione 1:} Parametri impostati con $\alpha = 0.1$, $\gamma = 0.99$ ed un tasso di esplorazione iniziale $\epsilon$ oppure $TEMP = 0.9$. Il limite massimo di passi per episodio (\texttt{max\_step}) è stato mantenuto al valore di default dell'ambiente, pari a $250$.
+    \item \textbf{Configurazione 2:} Parametri impostati con $\alpha = 0.1$, $\gamma = 0.99$. In questo caso, si è optato per una strategia di esplorazione iniziale più aggressiva, impostando $\epsilon$ oppure $TEMP= 1.0$. Inoltre, per concedere all'agente un orizzonte temporale più ampio per l'esplorazione casuale, il limite di passi è stato raddoppiato, portando il \texttt{max\_step} a $500$.
 \end{itemize}
 
-\subsection{Risultati Sperimentali}
+\subsection{Risultati Sperimentali $\epsilon$-greedy}
+\label{cap:epsilon}
 
 Nelle figure seguenti sono riportati i grafici relativi alle 10 esecuzioni (run) di addestramento. Le prime cinque misurazioni (\textbf{Figura \ref{fig:config1}}) fanno riferimento alla Configurazione 1, mentre le successive cinque (\textbf{Figura \ref{fig:config2}}) sono relative alla Configurazione 2.
 \begin{figure}[htbp]
@@ -276,7 +270,7 @@ Nelle figure seguenti sono riportati i grafici relativi alle 10 esecuzioni (run)
 
 \clearpage
 
-\subsection{Analisi e Confronto delle Configurazioni}
+\subsection{Analisi e Confronto delle Configurazioni di $\epsilon$-greedy}
 
 Osservando i dati raccolti, emerge chiaramente che la \textbf{Configurazione 2} riesce a ottenere risultati ottimali e, soprattutto, ampiamente riproducibili nel tempo, a differenza della Configurazione 1 che mostra una maggiore instabilità o una convergenza verso policy sub-ottimali. 
 
@@ -286,5 +280,97 @@ Questo netto miglioramento delle performance è attribuibile a due fattori chiav
     \item \textbf{Esplorazione massimizzata:} L'utilizzo di un tasso di esplorazione iniziale più elevato ($\epsilon = 1.0$) assicura che l'agente esplori a fondo l'ambiente prima di iniziare ad affidarsi alla policy appresa (\textit{exploitation}). In un ambiente a ricompensa sparsa come questo, esplorare maggiormente all'inizio previene la convergenza prematura e permette all'algoritmo di propagare correttamente i valori Q a ritroso dal goal fino agli stati iniziali.
 \end{enumerate}
 
+\subsection{Risultati Sperimentali Softmax}
+\label{cap:softmax}
+
+Nelle figure seguenti sono riportati i grafici relativi alle 10 esecuzioni (run) di addestramento. Le prime cinque misurazioni (\textbf{Figura \ref{fig:config3}}) fanno riferimento alla Configurazione 2, mentre le successive cinque (\textbf{Figura \ref{fig:config4}}) sono relative alla Configurazione 1.
+
+\pagebreak
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.6\textwidth}
+        \includegraphics[width=\linewidth]{figure/Q-Learning/qtable11.png}
+        \caption{Run 11}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.6\textwidth}
+        \includegraphics[width=\linewidth]{figure/Q-Learning/qtable12.png}
+        \caption{Run 12}
+    \end{subfigure}
+
+    \vspace{1em}
+
+    \begin{subfigure}{0.6\textwidth}
+        \includegraphics[width=\linewidth]{figure/Q-Learning/qtable13.png}
+        \caption{Run 13}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.6\textwidth}
+        \includegraphics[width=\linewidth]{figure/Q-Learning/qtable14.png}
+        \caption{Run 14}
+    \end{subfigure}
+
+    \vspace{1em}
+
+    \begin{subfigure}{0.6\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figure/Q-Learning/qtable15.png}
+        \caption{Run 15}
+    \end{subfigure}
+    
+    \caption{Risultati ottenuti con la Configurazione 2 ($TEMP=1.0$, \texttt{max\_step}=500).}
+    \label{fig:config3}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.6\textwidth}
+        \includegraphics[width=\linewidth]{figure/Q-Learning/qtable16.png}
+        \caption{Run 16}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.6\textwidth}
+        \includegraphics[width=\linewidth]{figure/Q-Learning/qtable17.png}
+        \caption{Run 17}
+    \end{subfigure}
+
+    \vspace{1em}
+
+    \begin{subfigure}{0.6\textwidth}
+        \includegraphics[width=\linewidth]{figure/Q-Learning/qtable18.png}
+        \caption{Run 18}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.6\textwidth}
+        \includegraphics[width=\linewidth]{figure/Q-Learning/qtable19.png}
+        \caption{Run 19}
+    \end{subfigure}
+
+    \vspace{1em}
+
+    \begin{subfigure}{0.6\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figure/Q-Learning/qtable20.png}
+        \caption{Run 20}
+    \end{subfigure}
+
+    \caption{Risultati ottenuti con la Configurazione 1 ($TEMP=0.9$, \texttt{max\_step}=250).}
+    \label{fig:config4}
+\end{figure}
+
+\clearpage
+
+\subsection{Analisi e Confronto delle Configurazioni di Softmax}
+Le prestazioni registrate con la politica di selezione Softmax confermano quanto osservato precedentemente per l'approccio $\epsilon$-greedy: la \textbf{Configurazione 2} si attesta come il setup più efficace in termini di efficienza e stabilità temporale. 
+
+Le determinanti di tale successo risultano sovrapponibili a quelle esaminate in fase di analisi dei dati per la strategia $\epsilon$-greedy (si veda il Capitolo 2.5), confermando la solidità della configurazione indipendentemente dal meccanismo di selezione delle azioni adottato.
+
+\subsection{$\epsilon$-greedy vs Softmax}
+Le analisi condotte nei capitoli precedenti hanno evidenziato come la \textbf{Configurazione 2} garantisca prestazioni sistematicamente superiori rispetto alla Configurazione 1, indipendentemente dalla strategia di esplorazione adottata. 
+
+Assodata l'efficacia di tale setup parametrico, si rende necessaria un'indagine comparativa volta a determinare quale tra i due approcci risulti più idoneo alle specificità dell'ambiente in esame. 
+
+Dall'analisi dei risultati riportati nei Capitoli \ref{cap:epsilon} e \ref{cap:softmax}, emerge chiaramente come la politica $\epsilon$-greedy sia in grado di convergere verso il reward ottimale con una velocità superiore, richiedendo un numero di episodi sensibilmente inferiore rispetto alla controparte \textit{Softmax}.
 
 \end{document}
