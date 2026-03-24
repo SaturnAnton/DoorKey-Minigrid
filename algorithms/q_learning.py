@@ -6,7 +6,9 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 
-env = gym.make("MiniGrid-DoorKey-5x5-v0")
+env = gym.make("MiniGrid-DoorKey-8x8-v0", max_steps = 500)
+
+env = FullyObsWrapper(env)
 
 EPISODES = 5000  # EPISODI = numero di tentativi che l'agente fa per imparare
 ALPHA = 0.1      # LEARNING RATE = velocità di apprendimento. Minore è il valore, maggiore è la memoria storica
@@ -18,7 +20,7 @@ def save_file(q):
     dict(**q)
     folder_path = os.path.join("..","data", "q_table")
     os.makedirs(folder_path, exist_ok=True)
-    filepath = os.path.join(folder_path, "qtable20.pkl")
+    filepath = os.path.join(folder_path, "test.pkl")
     with open(filepath, "wb") as file:
         pickle.dump(dict(**q), file)
 
@@ -98,7 +100,7 @@ def q_learning(environment, episodes, alpha, gamma, expl_func, expl_param):
     return q, rews, lengths
 
 print("Inizio del training...")
-sol, rews, lengths = q_learning(env, EPISODES, ALPHA, GAMMA, softmax, TEMP)
+sol, rews, lengths = q_learning(env, EPISODES, ALPHA, GAMMA, epsilon_greedy, EPSILON)
 print("Fine")
 
 # Creiamo un grafico con due "sotto-grafici"

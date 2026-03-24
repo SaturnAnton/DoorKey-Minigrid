@@ -6,7 +6,9 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 
-env = gym.make("MiniGrid-DoorKey-5x5-v0")
+env = gym.make("MiniGrid-DoorKey-8x8-v0", max_steps = 500)
+
+env = FullyObsWrapper(env)
 
 EPISODES = 5000
 ALPHA = 0.1
@@ -112,4 +114,4 @@ ax2.set_ylabel('Numero di Passi')
 plt.tight_layout()
 plt.show()
 
-save_file(sol)
+#save_file(sol)

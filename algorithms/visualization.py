@@ -6,7 +6,8 @@ import time
 import os
 
 def load_file(filename):
-    filepath = os.path.join("sarsa",filename)
+    folder_path = os.path.join("..","data", "q_table")
+    filepath = os.path.join(folder_path,filename)
     with open(filepath,"rb") as handle:
         qtable = pickle.load(handle)
     return qtable
@@ -16,13 +17,13 @@ def get_state_key(obs):
     direction = obs['direction']
     return str(list(img_flat) + [direction])
 
-env = gym.make("MiniGrid-DoorKey-5x5-v0", render_mode="human")
+env = gym.make("MiniGrid-DoorKey-8x8-v0", render_mode="human")
 
 obs, info = env.reset()
 s = get_state_key(obs)
 done = False
 
-q_table = load_file("sarsa3.pkl")
+q_table = load_file("test.pkl")
 
 while not done:
     a = np.argmax(q_table[s])
