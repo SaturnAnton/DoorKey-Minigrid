@@ -4,7 +4,10 @@ Questo repository contiene l'implementazione e il confronto tra gli algoritmi di
 
 L'obiettivo dell'agente è apprendere come muoversi in una griglia, raccogliere una chiave, aprire una porta e raggiungere l'obiettivo finale nel minor numero di passi possibile.
 
-![Ambiente di gioco](figure/env.png)
+<div align="center">
+  <img src="figure/env.png" alt="Ambiente di gioco" width="200">
+  <p><i>Visualizzazione dell'ambiente DoorKey in MiniGrid</i></p>
+</div>
 
 ## Obiettivi del Progetto
 
