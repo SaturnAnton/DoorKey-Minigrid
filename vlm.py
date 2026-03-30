@@ -2,10 +2,18 @@ from transformers import Qwen3VLForConditionalGeneration, AutoProcessor
 
 # default: Load the model on the available device(s)
 model = Qwen3VLForConditionalGeneration.from_pretrained(
-    "Qwen/Qwen3-VL-8B-Instruct", dtype="auto", device_map="auto"
+    "Qwen/Qwen3-VL-4B-Instruct", dtype="auto", device_map="auto"
 )
 
-processor = AutoProcessor.from_pretrained("Qwen/Qwen/Qwen3-VL-8B-Instruct")
+# We recommend enabling flash_attention_2 for better acceleration and memory saving, especially in multi-image and video scenarios.
+# model = Qwen3VLForConditionalGeneration.from_pretrained(
+#     "Qwen/Qwen3-VL-4B-Instruct",
+#     dtype=torch.bfloat16,
+#     attn_implementation="flash_attention_2",
+#     device_map="auto",
+# )
+
+processor = AutoProcessor.from_pretrained("Qwen/Qwen3-VL-4B-Instruct")
 
 messages = [
     {
@@ -28,6 +36,7 @@ inputs = processor.apply_chat_template(
     return_dict=True,
     return_tensors="pt"
 )
+inputs = inputs.to(model.device)
 
 # Inference: Generation of the output
 generated_ids = model.generate(**inputs, max_new_tokens=128)
