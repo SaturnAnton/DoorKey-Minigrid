@@ -6,9 +6,7 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 
-env = gym.make("MiniGrid-DoorKey-8x8-v0", max_steps = 500)
-
-env = FullyObsWrapper(env)
+env = gym.make("MiniGrid-DoorKey-5x5-v0")
 
 EPISODES = 5000  # EPISODI = numero di tentativi che l'agente fa per imparare
 ALPHA = 0.1      # LEARNING RATE = velocità di apprendimento. Minore è il valore, maggiore è la memoria storica

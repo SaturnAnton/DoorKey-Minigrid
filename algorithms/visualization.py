@@ -17,8 +17,7 @@ def get_state_key(obs):
     direction = obs['direction']
     return str(list(img_flat) + [direction])
 
-env = gym.make("MiniGrid-DoorKey-8x8-v0", render_mode="human")
-env = FullyObsWrapper(env)
+env = gym.make("MiniGrid-DoorKey-5x5-v0", render_mode="human")
 
 obs, info = env.reset()
 s = get_state_key(obs)
