@@ -10,3 +10,6 @@
 *.auxlock
 .venv 
 venv/
+__pycache__
+models/
+runs/
