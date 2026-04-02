@@ -172,6 +172,9 @@ class Agent:
                 if datetime.now() - last_graph_update_time > timedelta(seconds=10):
                     self.save_graph(rewards_per_episode, epsilon_history)
                     last_graph_update_time = datetime.now()
+                
+                if episode % 100 == 0:
+                    print(f"siamo all'episodio {episode}")
 
     def save_graph(self, rewards_per_episode, epsilon_history):
         fig = plt.figure(1)
