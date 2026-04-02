@@ -1,14 +1,11 @@
 from PIL import Image
-from monorepo import GroqLLM, load_api_keys, GROQ_MULTIMODAL_MODEL_ID
+from monorepo import GroqLLM, load_api_keys
 
-# Carica la API key da ~/.env.ml
 load_api_keys()
 
-# Crea il client con il modello multimodale
-client = GroqLLM(model_id=GROQ_MULTIMODAL_MODEL_ID)
+client = GroqLLM(model_id="meta-llama/llama-4-scout-17b-16e-instruct")
 
 image = Image.open("figure/env.png")
 
-# Fai una domanda con un'immagine
 risposta = client.ask(prompt="Cosa vedi in questa immagine?", images=[image])
 print(risposta)
