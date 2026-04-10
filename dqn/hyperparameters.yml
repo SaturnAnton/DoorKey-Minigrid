@@ -1,14 +1,10 @@
 doorkey8x8:
-  env_id: MiniGrid-DoorKey-8x8-v0
-  replay_memory_size: 200000       
-  mini_batch_size: 128             
-  epsilon_init: 1.0
-  epsilon_decay: 0.998            
+  replay_memory_size: 200000
+  mini_batch_size: 128
+  epsilon_init: 1
+  epsilon_decay: 0.9997
   epsilon_min: 0.05
-  network_sync_rate: 1000           
-  learning_rate_a: 0.0001          
-  discount_factor_g: 0.99           
-  max_episode_steps: 1000           
-  fully_observable: true            
-  stop_on_reward: 100000
-  fc1_nodes: 256
+  network_sync_rate: 1000
+  learning_rate_a: 0.0001
+  discount_factor_g: 0.99
+  enable_double_dqn: true
