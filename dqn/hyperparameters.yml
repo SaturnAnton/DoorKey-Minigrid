@@ -2,7 +2,7 @@ doorkey8x8:
   replay_memory_size: 200000
   mini_batch_size: 128
   epsilon_init: 1
-  epsilon_decay: 0.9997
+  epsilon_decay: 0.999995 #0.99998
   epsilon_min: 0.05
   network_sync_rate: 1000
   learning_rate_a: 0.0001

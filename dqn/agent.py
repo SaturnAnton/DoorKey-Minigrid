@@ -49,6 +49,7 @@ class Agent:
 
         self.loss_fn   = nn.MSELoss()
         self.optimizer = None
+        self.optimizer2 = None
 
         self.LOG_FILE   = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}.log')
         self.MODEL_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}.pt')
@@ -65,11 +66,11 @@ class Agent:
             with open(self.LOG_FILE, 'w') as file:
                 file.write(log_message + '\n')
 
-        env = gym.make("MiniGrid-DoorKey-8x8-v0", render_mode="human" if render else None)
+        env = gym.make("MiniGrid-DoorKey-5x5-v0", render_mode="human" if render else None)
         print(env.unwrapped.max_steps)
         env = FullyObsWrapper(env)
 
-        num_states  = 193
+        num_states  = 76
         num_actions = env.action_space.n
 
         reward_per_episode = []
@@ -94,6 +95,7 @@ class Agent:
             step_count = 0
 
             self.optimizer = torch.optim.Adam(policy_dqn.parameters(), lr=self.learning_rate_a)
+            self.optimizer2 = torch.optim.Adam(target_dqn.parameters(), lr=self.learning_rate_a)
         else:
             # Carica la policy salvata e imposta la rete in modalità valutazione
             policy_dqn.load_state_dict(torch.load(self.MODEL_FILE))
@@ -131,6 +133,9 @@ class Agent:
                     memory.append((state, action, new_state, reward, terminated))
                     step_count += 1
 
+                    epsilon = max(epsilon * self.epsilon_decay, self.epsilon_min)
+                    epsilon_history.append(epsilon)
+
                 state = new_state
 
             reward_per_episode.append(episode_reward)
@@ -150,9 +155,6 @@ class Agent:
                 if current_time - last_graph_update_time > timedelta(seconds=10):
                     self.save_graph(reward_per_episode, epsilon_history)
                     last_graph_update_time = current_time
-
-                epsilon = max(epsilon * self.epsilon_decay, self.epsilon_min)
-                epsilon_history.append(epsilon)
 
                 # Si entra in questo if se è stata accumulata abbastanza esperienza
                 if len(memory) > self.mini_batch_size:
@@ -242,10 +244,15 @@ class Agent:
         # Confrontiamo quanto la rete pensava di ottenere (current_q) rispetto a quanto ha effettivamente ottenuto (target_q).
         loss = self.loss_fn(current_q, target_q)
 
-        # OTTIMIZZAZIONE
-        self.optimizer.zero_grad()  # Pulisce i gradienti del passo precedente
-        loss.backward()             # Calcola il gradiente (in che direzione correggere i pesi)
-        self.optimizer.step()       # Aggiorna i pesi della rete neurale
+        if random.random() < 0.5:
+            # OTTIMIZZAZIONE
+            self.optimizer.zero_grad()  # Pulisce i gradienti del passo precedente
+            loss.backward()             # Calcola il gradiente (in che direzione correggere i pesi)
+            self.optimizer.step()       # Aggiorna i pesi della rete neurale
+        else:
+            self.optimizer2.zero_grad()  # Pulisce i gradienti del passo precedente
+            loss.backward()             # Calcola il gradiente (in che direzione correggere i pesi)
+            self.optimizer2.step()       # Aggiorna i pesi della rete neurale 
 
 
 if __name__ == '__main__':
