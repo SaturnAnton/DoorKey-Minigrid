@@ -48,17 +48,17 @@ def train():
     state_space = env.observation_space.shape
     print(f"Azioni: {num_actions}, Spazio Osservazioni: {state_space}")
 
-    num_episodes = 5000
-    buffer_size = 50000
-    epsilon_ub = 1.0
-    epsilon_lb = 0.05
-    epsilon_decay = 5000000
-    minibatch_size = 128
-    gamma = 0.99
-    learning_rate = 0.0001
-    update_after = 500
-    train_every = 4
-    target_update_freq = 500
+    num_episodes       = 7000    
+    buffer_size        = 200000   
+    epsilon_ub         = 1.0
+    epsilon_lb         = 0.05
+    epsilon_decay      = 1950000 
+    minibatch_size     = 128
+    gamma              = 0.99
+    learning_rate      = 0.00005
+    update_after       = 2000     
+    train_every        = 4
+    target_update_freq = 2000     
 
     dqn = MlpMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
     dqn_target = MlpMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
@@ -67,8 +67,9 @@ def train():
     optimizer = optim.Adam(dqn.parameters(), lr=learning_rate)
     huber_loss = torch.nn.SmoothL1Loss()
     
+    #cambiata la dimensione
     buffer = ReplayBuffer(num_actions=num_actions, memory_len=buffer_size)
-    success_buffer = ReplayBuffer(num_actions=num_actions, memory_len=20000)
+    success_buffer = ReplayBuffer(num_actions=num_actions, memory_len=buffer_size)
 
     timesteps = 0
     returns_50 = []
@@ -105,9 +106,10 @@ def train():
                 optimizer.zero_grad()
 
                 states_mb, a_mb, reward_mb, next_states_mb, done_mb = buffer.sample_batch(device, minibatch_size)
-
-                if success_buffer.length() > 16:
-                    s_states, s_a, s_reward, s_next, s_done = success_buffer.sample_batch(device, 16)
+                
+                #cambiato il valore dell'if
+                if success_buffer.length() > 8:
+                    s_states, s_a, s_reward, s_next, s_done = success_buffer.sample_batch(device, 8)
                     states_mb = np.concatenate([states_mb, s_states], axis=0)
                     a_mb = torch.cat([a_mb, s_a], dim=0)
                     reward_mb = torch.cat([reward_mb, s_reward], dim=0)

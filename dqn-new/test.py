@@ -65,7 +65,7 @@ def test_model(model_path, grid_size, num_episodes):
     env.close()
 
 if __name__ == "__main__":
-    NOME_FILE_MODELLO = "doorkey_fullyobs_model_20260416_134516.pth" 
+    NOME_FILE_MODELLO = "8-8x8(nuovi parametri).pth" 
     
     GRID_SIZE = 8
     EPISODI_DI_TEST = 20
