@@ -1,9 +1,9 @@
-import time
 import torch
 import numpy as np
 
 from env import MinigridDoorKeyFullyObs
-from model import MlpMinigridPolicy
+from model import CnnMinigridPolicy
+from old_model import MlpMinigridPolicy
 
 def test_model(model_path, grid_size, num_episodes):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -14,7 +14,7 @@ def test_model(model_path, grid_size, num_episodes):
     state_space = env.observation_space.shape
 
     print(f"Caricamento dei pesi dal file: {model_path}")
-    model = MlpMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
+    model = CnnMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
     
     checkpoint = torch.load(model_path, map_location=device)
     model.load_state_dict(checkpoint['model_params'])
@@ -30,8 +30,6 @@ def test_model(model_path, grid_size, num_episodes):
         episode_reward = 0
 
         print(f"--- Inizio Episodio {episode + 1} ---")
-        
-        time.sleep(0.5)
 
         while not done:
             state_tensor = torch.tensor(state, dtype=torch.float32, device=device)
@@ -47,8 +45,6 @@ def test_model(model_path, grid_size, num_episodes):
             step_count += 1
             
             state = next_state
-            
-            time.sleep(0.1)
 
         if episode_reward > 0:
             success_count += 1
@@ -65,13 +61,32 @@ def test_model(model_path, grid_size, num_episodes):
     env.close()
 
 if __name__ == "__main__":
-    NOME_FILE_MODELLO = "8-8x8(nuovi parametri).pth" 
+    NOME_FILE_MODELLO = "20-8x8.pth" 
     
     GRID_SIZE = 8
-    EPISODI_DI_TEST = 20
+    EPISODI_DI_TEST = 100
 
     try:
         test_model(model_path=NOME_FILE_MODELLO, grid_size=GRID_SIZE, num_episodes=EPISODI_DI_TEST)
     except FileNotFoundError:
         print(f"ERRORE: Impossibile trovare il file '{NOME_FILE_MODELLO}'.")
         print("Assicurati di aver inserito il nome corretto generato alla fine di train.py.")
+
+
+#13 e 14 = 1_700_000, 7000, 12000
+#15 = cnn implementata, 1700000, 7000, 1000, 0.00005
+#16 = cnn implementata, 1700000, 8000, 1000, 0.00005
+#17 = cnn implementata, 1700000, 8000, 1000, 0.00005
+
+#VALORI TEST CON 100 EPISODI:
+#   19 = 90%
+#   18 = 93% - 96%
+#   17 = 85%
+#   16 = 90%
+#   15 = 77% - 76%
+#   14 = 21%
+#   13 = 57% - 63%
+#   12 = 21%
+#   11 = 45%
+#   10 = 48%
+#   9  = 25%

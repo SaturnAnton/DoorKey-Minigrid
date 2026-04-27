@@ -7,7 +7,7 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 
 from env import MinigridDoorKeyFullyObs
-from model import MlpMinigridPolicy, ReplayBuffer
+from model import CnnMinigridPolicy, ReplayBuffer
 
 def hard_update(local_model, target_model):
     target_model.load_state_dict(local_model.state_dict())
@@ -48,11 +48,11 @@ def train():
     state_space = env.observation_space.shape
     print(f"Azioni: {num_actions}, Spazio Osservazioni: {state_space}")
 
-    num_episodes       = 7000    
+    num_episodes       = 8000    
     buffer_size        = 200000   
     epsilon_ub         = 1.0
     epsilon_lb         = 0.05
-    epsilon_decay      = 1950000 
+    epsilon_decay      = 1_700_000
     minibatch_size     = 128
     gamma              = 0.99
     learning_rate      = 0.00005
@@ -60,8 +60,8 @@ def train():
     train_every        = 4
     target_update_freq = 2000     
 
-    dqn = MlpMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
-    dqn_target = MlpMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
+    dqn = CnnMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
+    dqn_target = CnnMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
     hard_update(dqn, dqn_target)
     
     optimizer = optim.Adam(dqn.parameters(), lr=learning_rate)
