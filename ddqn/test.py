@@ -61,7 +61,7 @@ def test_model(model_path, grid_size, num_episodes):
     env.close()
 
 if __name__ == "__main__":
-    NOME_FILE_MODELLO = "20-8x8.pth" 
+    NOME_FILE_MODELLO = "data/22-8x8.pth" 
     
     GRID_SIZE = 8
     EPISODI_DI_TEST = 100
@@ -79,6 +79,8 @@ if __name__ == "__main__":
 #17 = cnn implementata, 1700000, 8000, 1000, 0.00005
 
 #VALORI TEST CON 100 EPISODI:
+#   22 = 95%
+#   21 = 89%
 #   19 = 90%
 #   18 = 93% - 96%
 #   17 = 85%
