@@ -1,5 +1,4 @@
 import os
-import time
 from datetime import datetime
 import numpy as np
 import torch
@@ -33,8 +32,11 @@ def final_plot(rewards, losses):
     plt.ylabel('Loss')
 
     plt.tight_layout()
-    plt.savefig('final_training_result.png')
-    print("\nGrafico finale salvato come 'final_training_result.png'")
+    save_dir = "figure"
+    os.makedirs(save_dir, exist_ok=True)
+
+    plt.savefig(os.path.join(save_dir, "ddqn-23.png"))
+    print("\nGrafico finale salvato come 'figure/ddqn-23.png'")
     plt.show()
 
 def train():
@@ -155,7 +157,10 @@ def train():
 
     print("Addestramento completato!")
     
-    save_path = f"doorkey_fullyobs_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
+    save_dir = "data"
+    os.makedirs(save_dir, exist_ok=True)
+
+    save_path = os.path.join(save_dir, "23-8x8.pth")
     torch.save({'model_params': dqn.state_dict(), 'timesteps': timesteps}, save_path)
     print(f"Modello salvato in {save_path}")
 
