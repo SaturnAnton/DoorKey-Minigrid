@@ -4,12 +4,79 @@ import numpy as np
 import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
+from PIL import Image
+from monorepo import GroqLLM, load_api_keys, GROQ_MULTIMODAL_MODEL_ID
+import io
+import time
 
 from env import MinigridDoorKeyFullyObs
 from model import CnnMinigridPolicy, ReplayBuffer
 
+class TrackedGroqLLM(GroqLLM):
+    def __attrs_post_init__(self):
+        super().__attrs_post_init__()
+        self.total_tokens = 0
+        self.last_call_tokens = 0
+        self.calls = 0
+
+    def _image_text_chat(self, prompt, image, **kwargs):
+        from monorepo.LLM import encode_image_b64, _SAFEGUARD_IMAGE_RESOLUTION, _SAFEGUARD_N_LETTERS
+        from PIL import Image as PILImage
+        import numpy as np
+
+        if isinstance(image, np.ndarray):
+            image = PILImage.fromarray(image)
+            image_format = "png"
+        else:
+            image_format = image.format
+
+        height, width = image.size
+        if height > _SAFEGUARD_IMAGE_RESOLUTION or width > _SAFEGUARD_IMAGE_RESOLUTION:
+            raise ValueError(f"Image troppo grande: {width}x{height}")
+
+        b64 = encode_image_b64(image, image_format)
+
+        resp = self._client.chat.completions.create(
+            model=self.model_id,
+            messages=[{
+                "role": "user",
+                "content": [
+                    {"type": "image_url", "image_url": {"url": f"data:image/{image_format.lower()};base64,{b64}"}},
+                    {"type": "text", "text": prompt[:_SAFEGUARD_N_LETTERS]},
+                ],
+            }],
+            max_tokens=10,
+            stream=False, 
+        )
+
+        self.last_call_tokens = resp.usage.total_tokens
+        self.total_tokens += resp.usage.total_tokens
+        self.calls += 1
+
+        return resp.choices[0].message.content
+
 def hard_update(local_model, target_model):
     target_model.load_state_dict(local_model.state_dict())
+
+
+def reward_vlm(img_array, client, prompt):
+    
+    time.sleep(25)
+    buffer = io.BytesIO()
+    Image.fromarray(img_array.astype(np.uint8)).save(buffer, format="JPEG")
+    buffer.seek(0)
+    pil_image = Image.open(buffer)
+
+    risposta = client.ask(prompt=prompt, images=[pil_image])
+
+    print(
+        f"📊 [Call {client.calls}] "
+        f"questa chiamata: {client.last_call_tokens} tok | "
+        f"totale: {client.total_tokens}/500000 ({client.total_tokens / 5000:.1f}%) | "
+        f"reward: {risposta.strip()}"
+    )
+    
+    return float(risposta.strip())
 
 def final_plot(rewards, losses):
     plt.figure(figsize=(15, 5))
@@ -39,7 +106,45 @@ def final_plot(rewards, losses):
     print("\nGrafico finale salvato come 'figure/ddqn-23.png'")
     plt.show()
 
+#fai due grafici dei reward :un reward con quello vecchio e uno sulla vlm
+def plot_reward(r_r, r_vlm):
+    plt.figure(figsize=(15, 5))
+    
+    plt.subplot(121)
+    plt.title('Andamento Reward Totale')
+    plt.plot(r_r, color='blue', alpha=0.3, label='Reward Episodio')
+    if len(r_r) > 50:
+        means = np.convolve(r_r, np.ones(50)/50, mode='valid')
+        plt.plot(np.arange(49, len(r_r)), means, color='red', label='Media Mobile 50')
+    plt.xlabel('Episodi')
+    plt.ylabel('Reward di base')
+    plt.legend()
+
+    plt.subplot(122)
+    plt.title('Andamento Reward con VLM')
+    plt.plot(r_vlm, color='blue', alpha=0.3, label='Reward Episodio')
+    if len(r_vlm) > 50:
+        means = np.convolve(r_vlm, np.ones(50)/50, mode='valid')
+        plt.plot(np.arange(49, len(r_vlm)), means, color='red', label='Media Mobile 50')
+    plt.xlabel('Episodi')
+    plt.ylabel('Reward con VLM')
+    plt.legend()
+
+    plt.tight_layout()
+    save_dir = "figure"
+    os.makedirs(save_dir, exist_ok=True)
+
+    plt.savefig(os.path.join(save_dir, "ddqn-23.png"))
+    print("\nGrafico finale salvato come 'figure/ddqn-23.png'")
+    plt.show()
+
 def train():
+    load_api_keys()
+    with open("prompt1.txt", "r", encoding="utf-8") as f:
+        prompt = f.read().strip()
+    
+    client = TrackedGroqLLM(model_id=GROQ_MULTIMODAL_MODEL_ID)
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Training su dispositivo: {device}")
 
@@ -54,7 +159,7 @@ def train():
     buffer_size        = 200000   
     epsilon_ub         = 1.0
     epsilon_lb         = 0.05
-    epsilon_decay      = 1_700_000
+    epsilon_decay      = 1_500_000
     minibatch_size     = 128
     gamma              = 0.99
     learning_rate      = 0.00005
@@ -75,14 +180,17 @@ def train():
 
     timesteps = 0
     returns_50 = []
-    all_rewards = []   
+    all_rewards = []
+    state_rewards = []   
     losses_history = [] 
 
     for episode in range(num_episodes):
         state = env.reset()[0]
         ret = 0
+        ret_state = 0
         done = False
         episode_transitions = []
+        check = 0
 
         while not done:
             epsilon = max(epsilon_lb, epsilon_ub - timesteps / epsilon_decay)
@@ -94,9 +202,14 @@ def train():
                 net_out = dqn(state_tensor).detach().cpu().numpy()
                 action = np.argmax(net_out)
 
-            next_state, reward, terminated, truncated, _ = env.step(action)
+            img = env.render()
+            reward = reward_vlm(img,client,prompt)
+            print(check)
+            check += 1
+            next_state, state_reward , terminated, truncated, _ = env.step(action)
             done = terminated or truncated
             ret += reward
+            ret_state += state_reward
 
             buffer.add(state, action, reward, next_state, done)
             episode_transitions.append((state, action, reward, next_state, done))
@@ -109,7 +222,6 @@ def train():
 
                 states_mb, a_mb, reward_mb, next_states_mb, done_mb = buffer.sample_batch(device, minibatch_size)
                 
-                #cambiato il valore dell'if
                 if success_buffer.length() > 8:
                     s_states, s_a, s_reward, s_next, s_done = success_buffer.sample_batch(device, 8)
                     states_mb = np.concatenate([states_mb, s_states], axis=0)
@@ -147,6 +259,7 @@ def train():
                 success_buffer.add(s, a_t, r_t, ns, d)
 
         all_rewards.append(ret)
+        state_rewards.append(state_reward)
         returns_50.append(ret)
         if len(returns_50) > 50:
             returns_50.pop(0)
@@ -154,6 +267,8 @@ def train():
         if episode % 50 == 0:
             avg_return = np.mean(returns_50) if len(returns_50) > 0 else 0
             print(f"Episodio {episode}\tMedia Ritorno (ultimi 50): {avg_return:.2f}\tEpsilon: {epsilon:.3f}")
+
+        print(episode)
 
     print("Addestramento completato!")
     
@@ -164,7 +279,9 @@ def train():
     torch.save({'model_params': dqn.state_dict(), 'timesteps': timesteps}, save_path)
     print(f"Modello salvato in {save_path}")
 
-    final_plot(all_rewards, losses_history)
+    plot_reward(all_rewards,state_rewards)
 
 if __name__ == "__main__":
     train()
+
+#fai due grafici dei reward andando a togliere quelli della loss = un reward con quello vecchio e uno sulla vlm
