@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 import numpy as np
 import torch
 import torch.optim as optim
@@ -11,49 +10,6 @@ import time
 
 from env import MinigridDoorKeyFullyObs
 from model import CnnMinigridPolicy, ReplayBuffer
-
-class TrackedGroqLLM(GroqLLM):
-    def __attrs_post_init__(self):
-        super().__attrs_post_init__()
-        self.total_tokens = 0
-        self.last_call_tokens = 0
-        self.calls = 0
-
-    def _image_text_chat(self, prompt, image, **kwargs):
-        from monorepo.LLM import encode_image_b64, _SAFEGUARD_IMAGE_RESOLUTION, _SAFEGUARD_N_LETTERS
-        from PIL import Image as PILImage
-        import numpy as np
-
-        if isinstance(image, np.ndarray):
-            image = PILImage.fromarray(image)
-            image_format = "png"
-        else:
-            image_format = image.format
-
-        height, width = image.size
-        if height > _SAFEGUARD_IMAGE_RESOLUTION or width > _SAFEGUARD_IMAGE_RESOLUTION:
-            raise ValueError(f"Image troppo grande: {width}x{height}")
-
-        b64 = encode_image_b64(image, image_format)
-
-        resp = self._client.chat.completions.create(
-            model=self.model_id,
-            messages=[{
-                "role": "user",
-                "content": [
-                    {"type": "image_url", "image_url": {"url": f"data:image/{image_format.lower()};base64,{b64}"}},
-                    {"type": "text", "text": prompt[:_SAFEGUARD_N_LETTERS]},
-                ],
-            }],
-            max_tokens=10,
-            stream=False, 
-        )
-
-        self.last_call_tokens = resp.usage.total_tokens
-        self.total_tokens += resp.usage.total_tokens
-        self.calls += 1
-
-        return resp.choices[0].message.content
 
 def hard_update(local_model, target_model):
     target_model.load_state_dict(local_model.state_dict())
@@ -68,13 +24,6 @@ def reward_vlm(img_array, client, prompt):
     pil_image = Image.open(buffer)
 
     risposta = client.ask(prompt=prompt, images=[pil_image])
-
-    print(
-        f"📊 [Call {client.calls}] "
-        f"questa chiamata: {client.last_call_tokens} tok | "
-        f"totale: {client.total_tokens}/500000 ({client.total_tokens / 5000:.1f}%) | "
-        f"reward: {risposta.strip()}"
-    )
     
     return float(risposta.strip())
 
@@ -134,8 +83,8 @@ def plot_reward(r_r, r_vlm):
     save_dir = "figure"
     os.makedirs(save_dir, exist_ok=True)
 
-    plt.savefig(os.path.join(save_dir, "ddqn-23.png"))
-    print("\nGrafico finale salvato come 'figure/ddqn-23.png'")
+    plt.savefig(os.path.join(save_dir, "ddqn-27.png"))
+    print("\nGrafico finale salvato come 'figure/ddqn-27.png'")
     plt.show()
 
 def train():
@@ -143,7 +92,7 @@ def train():
     with open("prompt1.txt", "r", encoding="utf-8") as f:
         prompt = f.read().strip()
     
-    client = TrackedGroqLLM(model_id=GROQ_MULTIMODAL_MODEL_ID)
+    client = GroqLLM(model_id=GROQ_MULTIMODAL_MODEL_ID)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Training su dispositivo: {device}")
@@ -155,7 +104,7 @@ def train():
     state_space = env.observation_space.shape
     print(f"Azioni: {num_actions}, Spazio Osservazioni: {state_space}")
 
-    num_episodes       = 8000    
+    num_episodes       = 5   
     buffer_size        = 200000   
     epsilon_ub         = 1.0
     epsilon_lb         = 0.05
@@ -275,7 +224,7 @@ def train():
     save_dir = "data"
     os.makedirs(save_dir, exist_ok=True)
 
-    save_path = os.path.join(save_dir, "23-8x8.pth")
+    save_path = os.path.join(save_dir, "27-8x8.pth")
     torch.save({'model_params': dqn.state_dict(), 'timesteps': timesteps}, save_path)
     print(f"Modello salvato in {save_path}")
 
@@ -283,5 +232,3 @@ def train():
 
 if __name__ == "__main__":
     train()
-
-#fai due grafici dei reward andando a togliere quelli della loss = un reward con quello vecchio e uno sulla vlm
