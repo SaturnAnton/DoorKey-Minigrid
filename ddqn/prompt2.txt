@@ -1,0 +1,12 @@
+CRITICAL: Reply with the float number ONLY. Absolutely NO explanations, NO markdown, NO text.
+
+Task: MiniGrid DoorKey reward.
+Grid markers: >=agent, K=key, |=door, G=goal.
+
+Rules:
+- K pickup (one-shot): +1.0 (K is gone)
+- DOOR open (one-shot): +1.0 (door | is open)
+- GOAL reached: +1.0 (agent on G)
+- Otherwise: -0.005
+
+Example output: -0.005
