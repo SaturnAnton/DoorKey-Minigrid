@@ -29,7 +29,7 @@ class MinigridDoorKeyFullyObs(gym.Wrapper):
         if render:
             env = gym.make(env_name,render_mode = "rgb_array",max_steps= 250)
         else:
-            env = gym.make(env_name,render_mode = "rgb_array",max_steps = 50)
+            env = gym.make(env_name,render_mode = "rgb_array",max_steps = 100)
             
         env = FullyObsWrapper(env)
         env = ImgObsWrapper(env)

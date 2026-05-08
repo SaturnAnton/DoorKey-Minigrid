@@ -15,7 +15,7 @@ def hard_update(local_model, target_model):
     target_model.load_state_dict(local_model.state_dict())
 
 
-def reward_vlm(img_array, client, prompt):
+def reward_vlm(img_array, client, prompt, max_retries=8):
     
     time.sleep(25)
     buffer = io.BytesIO()
@@ -23,9 +23,26 @@ def reward_vlm(img_array, client, prompt):
     buffer.seek(0)
     pil_image = Image.open(buffer)
 
-    risposta = client.ask(prompt=prompt, images=[pil_image])
-    
-    return float(risposta.strip())
+    for attempt in range(max_retries):
+        try:
+            risposta = client.ask(prompt=prompt, images=[pil_image])
+            try:
+                return float(risposta.strip())
+            except ValueError:
+                print(f"[Parsing] Risposta non numerica: '{risposta}' — reward = -0.005")
+                return -0.005
+
+        except Exception as e:
+            if "429" in str(e) or "rate_limit" in str(e).lower() or "too many" in str(e).lower():
+                wait = (2 ** attempt) + 60
+                print(f"[Rate limit Groq] Attendo {wait:.1f}s (tentativo {attempt+1}/{max_retries})")
+                time.sleep(wait)
+            else:
+                print(f"[Errore VLM] {e} — reward = -0.005")
+                return -0.005
+
+    print("[Max retries] Groq non disponibile, reward = -0.005")
+    return -0.005
 
 def final_plot(rewards, losses):
     plt.figure(figsize=(15, 5))
@@ -104,7 +121,7 @@ def train():
     state_space = env.observation_space.shape
     print(f"Azioni: {num_actions}, Spazio Osservazioni: {state_space}")
 
-    num_episodes       = 5   
+    num_episodes       = 10   
     buffer_size        = 200000   
     epsilon_ub         = 1.0
     epsilon_lb         = 0.05
