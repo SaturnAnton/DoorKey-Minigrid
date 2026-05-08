@@ -5,7 +5,6 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 from monorepo import CerebrasLLM, load_api_keys
 import time
-import random
 from env import MinigridDoorKeyFullyObs
 from model import CnnMinigridPolicy, ReplayBuffer
 
@@ -15,6 +14,8 @@ def hard_update(local_model, target_model):
 def reward_vlm(state, client, prompt, max_retries=8):
     full_prompt = f"{prompt}\n\nCurrent environment state:\n{state}"
     
+    time.sleep(10)
+
     for attempt in range(max_retries):
         try:
             risposta = client.ask(prompt=full_prompt)
@@ -26,7 +27,7 @@ def reward_vlm(state, client, prompt, max_retries=8):
                 
         except Exception as e:
             if "429" in str(e) or "queue_exceeded" in str(e):
-                wait = (2 ** attempt) + random.uniform(0, 2)
+                wait = (2 ** attempt) + 60
                 print(f"[Rate limit] Attendo {wait:.1f}s (tentativo {attempt+1}/{max_retries})")
                 time.sleep(wait)
             else:
@@ -60,8 +61,8 @@ def final_plot(rewards, losses):
     save_dir = "figure"
     os.makedirs(save_dir, exist_ok=True)
 
-    plt.savefig(os.path.join(save_dir, "ddqn-25.png"))
-    print("\nGrafico finale salvato come 'figure/ddqn-25.png'")
+    plt.savefig(os.path.join(save_dir, "ddqn-28.png"))
+    print("\nGrafico finale salvato come 'figure/ddqn-28.png'")
     plt.show()
 
 def plot_reward(r_r, r_vlm):
@@ -91,8 +92,8 @@ def plot_reward(r_r, r_vlm):
     save_dir = "figure"
     os.makedirs(save_dir, exist_ok=True)
 
-    plt.savefig(os.path.join(save_dir, "ddqn-26.png"))
-    print("\nGrafico finale salvato come 'figure/ddqn-26.png'")
+    plt.savefig(os.path.join(save_dir, "ddqn-28.png"))
+    print("\nGrafico finale salvato come 'figure/ddqn-28.png'")
     plt.show()
 
 def train():
@@ -233,7 +234,7 @@ def train():
     save_dir = "data"
     os.makedirs(save_dir, exist_ok=True)
 
-    save_path = os.path.join(save_dir, "26-8x8.pth")
+    save_path = os.path.join(save_dir, "28-8x8.pth")
     torch.save({'model_params': dqn.state_dict(), 'timesteps': timesteps}, save_path)
     print(f"Modello salvato in {save_path}")
 
