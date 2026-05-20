@@ -14,7 +14,7 @@ def hard_update(local_model, target_model):
 def reward_vlm(state, client, prompt, max_retries=8):
     full_prompt = f"{prompt}\n\nCurrent environment state:\n{state}"
     
-    time.sleep(10)
+    time.sleep(15)
 
     for attempt in range(max_retries):
         try:
@@ -113,7 +113,7 @@ def train():
     state_space = env.observation_space.shape
     print(f"Azioni: {num_actions}, Spazio Osservazioni: {state_space}")
 
-    num_episodes       = 10
+    num_episodes       = 12
     buffer_size        = 200000   
     epsilon_ub         = 1.0
     epsilon_lb         = 0.05
