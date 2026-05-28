@@ -3,38 +3,45 @@ import numpy as np
 import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
-from monorepo import CerebrasLLM, load_api_keys
-import time
+from openai import OpenAI
 from env import MinigridDoorKeyFullyObs
 from model import CnnMinigridPolicy, ReplayBuffer
+import time
 
 def hard_update(local_model, target_model):
     target_model.load_state_dict(local_model.state_dict())
 
 def reward_vlm(state, client, prompt, max_retries=8):
     full_prompt = f"{prompt}\n\nCurrent environment state:\n{state}"
-    
-    time.sleep(15)
+
+    messages = [
+        {"role": "user", "content": full_prompt},
+    ]
 
     for attempt in range(max_retries):
         try:
-            risposta = client.ask(prompt=full_prompt)
+            chat_response = client.chat.completions.create(
+                model="Qwen/Qwen3.5-2B",
+                messages=messages,
+                max_tokens=16,
+                temperature=0.0,
+                top_p=1.0,
+                timeout=30.0,
+            )
+            risposta = chat_response.choices[0].message.content
             try:
                 return float(risposta.strip())
             except ValueError:
                 print(f"[Parsing] Risposta non numerica: '{risposta}' — reward = -0.005")
                 return -0.005
-                
+
         except Exception as e:
-            if "429" in str(e) or "queue_exceeded" in str(e):
-                wait = (2 ** attempt) + 60
-                print(f"[Rate limit] Attendo {wait:.1f}s (tentativo {attempt+1}/{max_retries})")
-                time.sleep(wait)
-            else:
-                print(f"[Errore LLM] {e} — reward = -0.005")
+            wait = min(2 ** attempt, 10)
+            print(f"[Errore LLM] tentativo {attempt+1}/{max_retries}: {e} — attendo {wait}s")
+            if attempt == max_retries - 1:
                 return -0.005
-    
-    print("[Max retries] Cerebras non disponibile, reward = -0.005")
+            time.sleep(wait)
+
     return -0.005
 
 def plot_reward(r_r, r_vlm):
@@ -57,23 +64,25 @@ def plot_reward(r_r, r_vlm):
         means = np.convolve(r_vlm, np.ones(50)/50, mode='valid')
         plt.plot(np.arange(49, len(r_vlm)), means, color='red', label='Media Mobile 50')
     plt.xlabel('Episodi')
-    plt.ylabel('Reward con VLM')
+    plt.ylabel('Reward con LLM')
     plt.legend()
 
     plt.tight_layout()
     save_dir = "figure"
     os.makedirs(save_dir, exist_ok=True)
 
-    plt.savefig(os.path.join(save_dir, "ddqn-28.png"))
-    print("\nGrafico finale salvato come 'figure/ddqn-28.png'")
+    plt.savefig(os.path.join(save_dir, "ddqn-32.png"))
+    print("\nGrafico finale salvato come 'figure/ddqn-32.png'")
     plt.show()
 
 def train():
-    load_api_keys()
     with open("prompt2.txt", "r", encoding="utf-8") as f:
         prompt = f.read().strip()
-    
-    client = CerebrasLLM(model_id="llama3.1-8b")
+
+    client = OpenAI(
+    api_key="EMPTY",
+    base_url="http://localhost:8000/v1"
+    )
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Training su dispositivo: {device}")
@@ -85,17 +94,17 @@ def train():
     state_space = env.observation_space.shape
     print(f"Azioni: {num_actions}, Spazio Osservazioni: {state_space}")
 
-    num_episodes       = 12
-    buffer_size        = 200000   
+    num_episodes       = 30
+    buffer_size        = 200000
     epsilon_ub         = 1.0
     epsilon_lb         = 0.05
-    epsilon_decay      = 1_500_000
-    minibatch_size     = 128
+    epsilon_decay      = 5_000    
+    minibatch_size     = 32       
     gamma              = 0.99
-    learning_rate      = 0.00005
-    update_after       = 2000     
-    train_every        = 4
-    target_update_freq = 2000     
+    learning_rate      = 0.0001   
+    update_after       = 300      
+    train_every        = 2        
+    target_update_freq = 500           
 
     dqn = CnnMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
     dqn_target = CnnMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
@@ -135,7 +144,6 @@ def train():
             state_str = str(env.unwrapped)
             reward = reward_vlm(state_str,client,prompt)
             print(check)
-            print(reward)
             check += 1
             next_state, state_reward , terminated, truncated, _ = env.step(action)
             done = terminated or truncated
@@ -190,7 +198,7 @@ def train():
                 success_buffer.add(s, a_t, r_t, ns, d)
 
         all_rewards.append(ret)
-        state_rewards.append(state_reward)
+        state_rewards.append(ret_state)
         returns_50.append(ret)
         if len(returns_50) > 50:
             returns_50.pop(0)
@@ -206,7 +214,7 @@ def train():
     save_dir = "data"
     os.makedirs(save_dir, exist_ok=True)
 
-    save_path = os.path.join(save_dir, "28-8x8.pth")
+    save_path = os.path.join(save_dir, "32-8x8.pth")
     torch.save({'model_params': dqn.state_dict(), 'timesteps': timesteps}, save_path)
     print(f"Modello salvato in {save_path}")
 

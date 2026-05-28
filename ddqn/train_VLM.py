@@ -3,40 +3,48 @@ import numpy as np
 import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
-from monorepo import CerebrasLLM, load_api_keys
+from PIL import Image
+from monorepo import GroqLLM, load_api_keys, GROQ_MULTIMODAL_MODEL_ID
+import io
 import time
+
 from env import MinigridDoorKeyFullyObs
 from model import CnnMinigridPolicy, ReplayBuffer
 
 def hard_update(local_model, target_model):
     target_model.load_state_dict(local_model.state_dict())
 
-def reward_vlm(state, client, prompt, max_retries=8):
-    full_prompt = f"{prompt}\n\nCurrent environment state:\n{state}"
+
+def reward_vlm(img_array, client, prompt, max_retries=8):
     
-    time.sleep(15)
+    time.sleep(25)
+    buffer = io.BytesIO()
+    Image.fromarray(img_array.astype(np.uint8)).save(buffer, format="JPEG")
+    buffer.seek(0)
+    pil_image = Image.open(buffer)
 
     for attempt in range(max_retries):
         try:
-            risposta = client.ask(prompt=full_prompt)
+            risposta = client.ask(prompt=prompt, images=[pil_image])
             try:
                 return float(risposta.strip())
             except ValueError:
                 print(f"[Parsing] Risposta non numerica: '{risposta}' — reward = -0.005")
                 return -0.005
-                
+
         except Exception as e:
-            if "429" in str(e) or "queue_exceeded" in str(e):
+            if "429" in str(e) or "rate_limit" in str(e).lower() or "too many" in str(e).lower():
                 wait = (2 ** attempt) + 60
-                print(f"[Rate limit] Attendo {wait:.1f}s (tentativo {attempt+1}/{max_retries})")
+                print(f"[Rate limit Groq] Attendo {wait:.1f}s (tentativo {attempt+1}/{max_retries})")
                 time.sleep(wait)
             else:
-                print(f"[Errore LLM] {e} — reward = -0.005")
+                print(f"[Errore VLM] {e} — reward = -0.005")
                 return -0.005
-    
-    print("[Max retries] Cerebras non disponibile, reward = -0.005")
+
+    print("[Max retries] Groq non disponibile, reward = -0.005")
     return -0.005
 
+#fai due grafici dei reward :un reward con quello vecchio e uno sulla vlm
 def plot_reward(r_r, r_vlm):
     plt.figure(figsize=(15, 5))
     
@@ -64,16 +72,16 @@ def plot_reward(r_r, r_vlm):
     save_dir = "figure"
     os.makedirs(save_dir, exist_ok=True)
 
-    plt.savefig(os.path.join(save_dir, "ddqn-28.png"))
-    print("\nGrafico finale salvato come 'figure/ddqn-28.png'")
+    plt.savefig(os.path.join(save_dir, "ddqn-27.png"))
+    print("\nGrafico finale salvato come 'figure/ddqn-27.png'")
     plt.show()
 
 def train():
     load_api_keys()
-    with open("prompt2.txt", "r", encoding="utf-8") as f:
+    with open("prompt1.txt", "r", encoding="utf-8") as f:
         prompt = f.read().strip()
     
-    client = CerebrasLLM(model_id="llama3.1-8b")
+    client = GroqLLM(model_id=GROQ_MULTIMODAL_MODEL_ID)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Training su dispositivo: {device}")
@@ -85,7 +93,7 @@ def train():
     state_space = env.observation_space.shape
     print(f"Azioni: {num_actions}, Spazio Osservazioni: {state_space}")
 
-    num_episodes       = 12
+    num_episodes       = 10   
     buffer_size        = 200000   
     epsilon_ub         = 1.0
     epsilon_lb         = 0.05
@@ -132,10 +140,9 @@ def train():
                 net_out = dqn(state_tensor).detach().cpu().numpy()
                 action = np.argmax(net_out)
 
-            state_str = str(env.unwrapped)
-            reward = reward_vlm(state_str,client,prompt)
+            img = env.render()
+            reward = reward_vlm(img,client,prompt)
             print(check)
-            print(reward)
             check += 1
             next_state, state_reward , terminated, truncated, _ = env.step(action)
             done = terminated or truncated
@@ -206,7 +213,7 @@ def train():
     save_dir = "data"
     os.makedirs(save_dir, exist_ok=True)
 
-    save_path = os.path.join(save_dir, "28-8x8.pth")
+    save_path = os.path.join(save_dir, "27-8x8.pth")
     torch.save({'model_params': dqn.state_dict(), 'timesteps': timesteps}, save_path)
     print(f"Modello salvato in {save_path}")
 
