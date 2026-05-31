@@ -49,7 +49,7 @@ def train():
     state_space = env.observation_space.shape
     print(f"Azioni: {num_actions}, Spazio Osservazioni: {state_space}")
 
-    num_episodes       = 8000    
+    num_episodes       = 700    
     buffer_size        = 200000   
     epsilon_ub         = 1.0
     epsilon_lb         = 0.05

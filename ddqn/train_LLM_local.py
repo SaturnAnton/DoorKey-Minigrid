@@ -8,6 +8,9 @@ from env import MinigridDoorKeyFullyObs
 from model import CnnMinigridPolicy, ReplayBuffer
 import time
 
+OLLAMA_MODEL    = "qwen2.5:1.5b"   
+OLLAMA_BASE_URL = "http://localhost:11434/v1"
+
 def hard_update(local_model, target_model):
     target_model.load_state_dict(local_model.state_dict())
 
@@ -21,12 +24,13 @@ def reward_vlm(state, client, prompt, max_retries=8):
     for attempt in range(max_retries):
         try:
             chat_response = client.chat.completions.create(
-                model="Qwen/Qwen3.5-2B",
+                model=OLLAMA_MODEL,
                 messages=messages,
-                max_tokens=16,
+                max_tokens=8,          
                 temperature=0.0,
                 top_p=1.0,
-                timeout=30.0,
+                stop=["\n", " \n"],     
+                timeout=10.0,           
             )
             risposta = chat_response.choices[0].message.content
             try:
@@ -36,7 +40,7 @@ def reward_vlm(state, client, prompt, max_retries=8):
                 return -0.005
 
         except Exception as e:
-            wait = min(2 ** attempt, 10)
+            wait = min(2 ** attempt, 5)   
             print(f"[Errore LLM] tentativo {attempt+1}/{max_retries}: {e} — attendo {wait}s")
             if attempt == max_retries - 1:
                 return -0.005
@@ -58,7 +62,7 @@ def plot_reward(r_r, r_vlm):
     plt.legend()
 
     plt.subplot(122)
-    plt.title('Andamento Reward con VLM')
+    plt.title('Andamento Reward con LLM')
     plt.plot(r_vlm, color='blue', alpha=0.3, label='Reward Episodio')
     if len(r_vlm) > 50:
         means = np.convolve(r_vlm, np.ones(50)/50, mode='valid')
@@ -71,8 +75,8 @@ def plot_reward(r_r, r_vlm):
     save_dir = "figure"
     os.makedirs(save_dir, exist_ok=True)
 
-    plt.savefig(os.path.join(save_dir, "ddqn-32.png"))
-    print("\nGrafico finale salvato come 'figure/ddqn-32.png'")
+    plt.savefig(os.path.join(save_dir, "ddqn-36.png"))
+    print("\nGrafico finale salvato come 'figure/ddqn-36.png'")
     plt.show()
 
 def train():
@@ -80,9 +84,22 @@ def train():
         prompt = f.read().strip()
 
     client = OpenAI(
-    api_key="EMPTY",
-    base_url="http://localhost:8000/v1"
+        api_key="ollama",           
+        base_url=OLLAMA_BASE_URL,
     )
+
+    print("Warmup Ollama (caricamento modello in VRAM)...")
+    try:
+        client.chat.completions.create(
+            model=OLLAMA_MODEL,
+            messages=[{"role": "user", "content": "Reply: -0.005"}],
+            max_tokens=8,
+            temperature=0.0,
+        )
+        print("Warmup completato.\n")
+    except Exception as e:
+        print(f"[Warmup fallito] {e} — assicurati che Ollama sia in esecuzione con: ollama serve")
+        return
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Training su dispositivo: {device}")
@@ -94,17 +111,17 @@ def train():
     state_space = env.observation_space.shape
     print(f"Azioni: {num_actions}, Spazio Osservazioni: {state_space}")
 
-    num_episodes       = 30
-    buffer_size        = 200000
+    num_episodes       = 300
     epsilon_ub         = 1.0
     epsilon_lb         = 0.05
-    epsilon_decay      = 5_000    
-    minibatch_size     = 32       
+    epsilon_decay      = 280_000
+    buffer_size        = 200_000
+    update_after       = 2_000
+    minibatch_size     = 64
+    train_every        = 2
+    target_update_freq = 3_000
     gamma              = 0.99
-    learning_rate      = 0.0001   
-    update_after       = 300      
-    train_every        = 2        
-    target_update_freq = 500           
+    learning_rate      = 0.0001       
 
     dqn = CnnMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
     dqn_target = CnnMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
@@ -113,15 +130,13 @@ def train():
     optimizer = optim.Adam(dqn.parameters(), lr=learning_rate)
     huber_loss = torch.nn.SmoothL1Loss()
     
-    #cambiata la dimensione
     buffer = ReplayBuffer(num_actions=num_actions, memory_len=buffer_size)
     success_buffer = ReplayBuffer(num_actions=num_actions, memory_len=buffer_size)
 
     timesteps = 0
-    returns_50 = []
     all_rewards = []
     state_rewards = []   
-    losses_history = [] 
+    losses_history = []
 
     for episode in range(num_episodes):
         state = env.reset()[0]
@@ -129,7 +144,7 @@ def train():
         ret_state = 0
         done = False
         episode_transitions = []
-        check = 0
+        ep_start = time.perf_counter()
 
         while not done:
             epsilon = max(epsilon_lb, epsilon_ub - timesteps / epsilon_decay)
@@ -142,10 +157,10 @@ def train():
                 action = np.argmax(net_out)
 
             state_str = str(env.unwrapped)
-            reward = reward_vlm(state_str,client,prompt)
-            print(check)
-            check += 1
-            next_state, state_reward , terminated, truncated, _ = env.step(action)
+
+            reward = reward_vlm(state_str, client, prompt)
+
+            next_state, state_reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
             ret += reward
             ret_state += state_reward
@@ -199,26 +214,20 @@ def train():
 
         all_rewards.append(ret)
         state_rewards.append(ret_state)
-        returns_50.append(ret)
-        if len(returns_50) > 50:
-            returns_50.pop(0)
-
-        if episode % 50 == 0:
-            avg_return = np.mean(returns_50) if len(returns_50) > 0 else 0
-            print(f"Episodio {episode}\tMedia Ritorno (ultimi 50): {avg_return:.2f}\tEpsilon: {epsilon:.3f}")
-
-        print(episode)
+        
+        ep_time = time.perf_counter() - ep_start
+        print(f"Episode: {episode} - REWARD BASE = {ret_state:.3f} - REWARD LLM = {ret:.3f} - Epsilon = {epsilon:.3f} - Durata = {ep_time:.1f}s")
 
     print("Addestramento completato!")
     
     save_dir = "data"
     os.makedirs(save_dir, exist_ok=True)
 
-    save_path = os.path.join(save_dir, "32-8x8.pth")
+    save_path = os.path.join(save_dir, "36-8x8.pth")
     torch.save({'model_params': dqn.state_dict(), 'timesteps': timesteps}, save_path)
     print(f"Modello salvato in {save_path}")
 
-    plot_reward(all_rewards,state_rewards)
+    plot_reward(all_rewards, state_rewards)
 
 if __name__ == "__main__":
     train()
