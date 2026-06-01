@@ -8,7 +8,7 @@ from env import MinigridDoorKeyFullyObs
 from model import CnnMinigridPolicy, ReplayBuffer
 import time
 
-OLLAMA_MODEL    = "qwen2.5:1.5b"   
+OLLAMA_MODEL    = "qwen2.5:3b"   
 OLLAMA_BASE_URL = "http://localhost:11434/v1"
 
 def hard_update(local_model, target_model):
@@ -111,17 +111,17 @@ def train():
     state_space = env.observation_space.shape
     print(f"Azioni: {num_actions}, Spazio Osservazioni: {state_space}")
 
-    num_episodes       = 300
+    num_episodes       = 600
     epsilon_ub         = 1.0
     epsilon_lb         = 0.05
-    epsilon_decay      = 280_000
-    buffer_size        = 200_000
-    update_after       = 2_000
-    minibatch_size     = 64
-    train_every        = 2
-    target_update_freq = 3_000
-    gamma              = 0.99
-    learning_rate      = 0.0001       
+    epsilon_decay      = 500_000   
+    buffer_size        = 300_000   
+    update_after       = 2_000     
+    minibatch_size     = 64        
+    train_every        = 2         
+    target_update_freq = 4_000     
+    gamma              = 0.99      
+    learning_rate      = 0.00005          
 
     dqn = CnnMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
     dqn_target = CnnMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
@@ -146,6 +146,8 @@ def train():
         episode_transitions = []
         ep_start = time.perf_counter()
 
+        count = 0
+
         while not done:
             epsilon = max(epsilon_lb, epsilon_ub - timesteps / epsilon_decay)
             
@@ -159,6 +161,10 @@ def train():
             state_str = str(env.unwrapped)
 
             reward = reward_vlm(state_str, client, prompt)
+            print(reward)
+            if reward != float(-0.005):
+                print("ok")
+                count = 1 + count
 
             next_state, state_reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
@@ -214,9 +220,14 @@ def train():
 
         all_rewards.append(ret)
         state_rewards.append(ret_state)
+
+        if count == 3:
+            frase = "SI"
+        else:
+            frase = "NO"
         
         ep_time = time.perf_counter() - ep_start
-        print(f"Episode: {episode} - REWARD BASE = {ret_state:.3f} - REWARD LLM = {ret:.3f} - Epsilon = {epsilon:.3f} - Durata = {ep_time:.1f}s")
+        print(f"Episode: {episode} - REWARD BASE = {ret_state:.3f} - REWARD LLM = {ret:.3f} - Epsilon = {epsilon:.3f} - Durata = {ep_time:.1f}s - Concluso = {frase}")
 
     print("Addestramento completato!")
     
