@@ -11,10 +11,39 @@ import time
 OLLAMA_MODEL    = "qwen2.5:3b"   
 OLLAMA_BASE_URL = "http://localhost:11434/v1"
 
+def grid_to_str(env):
+    grid = env.unwrapped.grid
+    width = env.unwrapped.width
+    height = env.unwrapped.height
+    agent_pos = env.unwrapped.agent_pos
+
+    SYMBOLS = {
+        'wall':   '>',
+        'door':   'D',
+        'key':    'K',
+        'goal':   'G',
+        'lava':   'L',
+        None:     ' ',
+    }
+
+    rows = []
+    for y in range(height):
+        row = ''
+        for x in range(width):
+            if (x, y) == tuple(agent_pos):
+                row += 'A'
+            else:
+                cell = grid.get(x, y)
+                obj_type = cell.type if cell is not None else None
+                row += SYMBOLS.get(obj_type, '?')
+        rows.append(row)
+
+    return '\n'.join(rows)
+
 def hard_update(local_model, target_model):
     target_model.load_state_dict(local_model.state_dict())
 
-def reward_vlm(state, client, prompt, max_retries=8):
+def reward_llm(state, client, prompt, max_retries=8):
     full_prompt = f"{prompt}\n\nCurrent environment state:\n{state}"
 
     messages = [
@@ -158,10 +187,9 @@ def train():
                 net_out = dqn(state_tensor).detach().cpu().numpy()
                 action = np.argmax(net_out)
 
-            state_str = str(env.unwrapped)
+            state_str = grid_to_str(env)
 
-            reward = reward_vlm(state_str, client, prompt)
-            print(reward)
+            reward = reward_llm(state_str, client, prompt)
             if reward != float(-0.005):
                 print("ok")
                 count = 1 + count

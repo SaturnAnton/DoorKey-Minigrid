@@ -1,12 +1,17 @@
 CRITICAL: Reply with the float number ONLY. Absolutely NO explanations, NO markdown, NO text.
 
-Task: MiniGrid DoorKey reward.
-Grid markers: >=agent, K=key, |=door, G=goal.
+Task: MiniGrid DoorKey reward calculation based on the grid below.
+ 
+Grid markers: 
+A = Agent
+K = Key
+D = Door
+G = Goal
+> = Wall
+space = Empty cell
 
-Rules:
-- K pickup (one-shot): +1.0 (K is gone)
-- DOOR open (one-shot): +1.0 (door | is open)
-- GOAL reached: +1.0 (agent on G)
-- Otherwise: -0.005
+Rules (evaluate in order, stop at first match):
+1. If the Agent (A) has successfully collected the key, opened the door, or reached the goal in this state → +1.0
+2. None of the above / Regular exploration step → -0.005
 
-Example output: -0.005
+Output format: a single float
