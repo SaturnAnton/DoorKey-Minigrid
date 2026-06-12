@@ -8,7 +8,7 @@ from env import MinigridDoorKeyFullyObs
 from model import CnnMinigridPolicy, ReplayBuffer
 import time
 
-OLLAMA_MODEL    = "qwen2.5:3b"   
+OLLAMA_MODEL = "llama3.2:3b"   
 OLLAMA_BASE_URL = "http://localhost:11434/v1"
 
 def grid_to_str(env):
@@ -43,33 +43,41 @@ def grid_to_str(env):
 def hard_update(local_model, target_model):
     target_model.load_state_dict(local_model.state_dict())
 
-def reward_llm(state, client, prompt, max_retries=8):
-    full_prompt = f"{prompt}\n\nCurrent environment state:\n{state}"
-
-    messages = [
-        {"role": "user", "content": full_prompt},
-    ]
+def reward_llm(prev_state, curr_state, client, prompt, max_retries=8):
+    full_prompt = (
+        prompt
+        .replace("{prev_state}", prev_state)
+        .replace("{curr_state}", curr_state)
+    )
+    messages = [{"role": "user", "content": full_prompt}]
 
     for attempt in range(max_retries):
         try:
             chat_response = client.chat.completions.create(
                 model=OLLAMA_MODEL,
                 messages=messages,
-                max_tokens=8,          
+                max_tokens=16,       
                 temperature=0.0,
                 top_p=1.0,
-                stop=["\n", " \n"],     
-                timeout=10.0,           
+                stop=["\n", " \n"],
+                timeout=10.0,
             )
-            risposta = chat_response.choices[0].message.content
+            risposta = chat_response.choices[0].message.content.strip()
+
+            risposta = risposta.replace("`", "").replace("'", "").replace('"', "").strip()
+
             try:
-                return float(risposta.strip())
+                val = float(risposta)
+                if val not in (1.0, -0.005):
+                    print(f"[Parsing] Valore inatteso: '{val}' → reward = -0.005")
+                    return -0.005
+                return val
             except ValueError:
-                print(f"[Parsing] Risposta non numerica: '{risposta}' — reward = -0.005")
+                print(f"[Parsing] Risposta non numerica: '{risposta}' → reward = -0.005")
                 return -0.005
 
         except Exception as e:
-            wait = min(2 ** attempt, 5)   
+            wait = min(2 ** attempt, 5)
             print(f"[Errore LLM] tentativo {attempt+1}/{max_retries}: {e} — attendo {wait}s")
             if attempt == max_retries - 1:
                 return -0.005
@@ -79,7 +87,7 @@ def reward_llm(state, client, prompt, max_retries=8):
 
 def plot_reward(r_r, r_vlm):
     plt.figure(figsize=(15, 5))
-    
+
     plt.subplot(121)
     plt.title('Andamento Reward Totale')
     plt.plot(r_r, color='blue', alpha=0.3, label='Reward Episodio')
@@ -104,8 +112,8 @@ def plot_reward(r_r, r_vlm):
     save_dir = "figure"
     os.makedirs(save_dir, exist_ok=True)
 
-    plt.savefig(os.path.join(save_dir, "ddqn-36.png"))
-    print("\nGrafico finale salvato come 'figure/ddqn-36.png'")
+    plt.savefig(os.path.join(save_dir, "ddqn-37.png"))
+    print("\nGrafico finale salvato come 'figure/ddqn-37.png'")
     plt.show()
 
 def train():
@@ -113,7 +121,7 @@ def train():
         prompt = f.read().strip()
 
     client = OpenAI(
-        api_key="ollama",           
+        api_key="ollama",
         base_url=OLLAMA_BASE_URL,
     )
 
@@ -122,7 +130,7 @@ def train():
         client.chat.completions.create(
             model=OLLAMA_MODEL,
             messages=[{"role": "user", "content": "Reply: -0.005"}],
-            max_tokens=8,
+            max_tokens=16,
             temperature=0.0,
         )
         print("Warmup completato.\n")
@@ -135,7 +143,7 @@ def train():
 
     GRID_SIZE = 8
     env = MinigridDoorKeyFullyObs(size=GRID_SIZE)
-    
+
     num_actions = env.action_space.n
     state_space = env.observation_space.shape
     print(f"Azioni: {num_actions}, Spazio Osservazioni: {state_space}")
@@ -143,28 +151,28 @@ def train():
     num_episodes       = 600
     epsilon_ub         = 1.0
     epsilon_lb         = 0.05
-    epsilon_decay      = 500_000   
-    buffer_size        = 300_000   
-    update_after       = 2_000     
-    minibatch_size     = 64        
-    train_every        = 2         
-    target_update_freq = 4_000     
-    gamma              = 0.99      
-    learning_rate      = 0.00005          
+    epsilon_decay      = 500_000
+    buffer_size        = 300_000
+    update_after       = 2_000
+    minibatch_size     = 64
+    train_every        = 2
+    target_update_freq = 4_000
+    gamma              = 0.99
+    learning_rate      = 0.00005
 
     dqn = CnnMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
     dqn_target = CnnMinigridPolicy(input_shape=state_space, num_actions=num_actions).to(device)
     hard_update(dqn, dqn_target)
-    
+
     optimizer = optim.Adam(dqn.parameters(), lr=learning_rate)
     huber_loss = torch.nn.SmoothL1Loss()
-    
+
     buffer = ReplayBuffer(num_actions=num_actions, memory_len=buffer_size)
     success_buffer = ReplayBuffer(num_actions=num_actions, memory_len=buffer_size)
 
     timesteps = 0
     all_rewards = []
-    state_rewards = []   
+    state_rewards = []
     losses_history = []
 
     for episode in range(num_episodes):
@@ -179,7 +187,7 @@ def train():
 
         while not done:
             epsilon = max(epsilon_lb, epsilon_ub - timesteps / epsilon_decay)
-            
+
             if np.random.random() < epsilon:
                 action = np.random.randint(low=0, high=num_actions)
             else:
@@ -187,21 +195,24 @@ def train():
                 net_out = dqn(state_tensor).detach().cpu().numpy()
                 action = np.argmax(net_out)
 
-            state_str = grid_to_str(env)
-
-            reward = reward_llm(state_str, client, prompt)
-            if reward != float(-0.005):
-                print("ok")
-                count = 1 + count
+            prev_state_str = grid_to_str(env)
 
             next_state, state_reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
+
+            curr_state_str = grid_to_str(env)
+
+            reward = reward_llm(prev_state_str, curr_state_str, client, prompt)
+            if reward != -0.005:
+                print(f"[Reward positivo] step={timesteps} reward={reward}")
+                count += 1
+
             ret += reward
             ret_state += state_reward
 
             buffer.add(state, action, reward, next_state, done)
             episode_transitions.append((state, action, reward, next_state, done))
-            
+
             state = next_state
             timesteps += 1
 
@@ -209,7 +220,7 @@ def train():
                 optimizer.zero_grad()
 
                 states_mb, a_mb, reward_mb, next_states_mb, done_mb = buffer.sample_batch(device, minibatch_size)
-                
+
                 if success_buffer.length() > 8:
                     s_states, s_a, s_reward, s_next, s_done = success_buffer.sample_batch(device, 8)
                     states_mb = np.concatenate([states_mb, s_states], axis=0)
@@ -232,11 +243,11 @@ def train():
 
                 predictions = torch.sum(q_values * a_mb, dim=1)
                 loss = huber_loss(predictions, targets)
-                
+
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(dqn.parameters(), 10)
                 optimizer.step()
-                
+
                 losses_history.append(loss.item())
 
             if timesteps % target_update_freq == 0:
@@ -249,20 +260,16 @@ def train():
         all_rewards.append(ret)
         state_rewards.append(ret_state)
 
-        if count == 3:
-            frase = "SI"
-        else:
-            frase = "NO"
-        
+        frase = "SI" if count == 3 else "NO"
         ep_time = time.perf_counter() - ep_start
         print(f"Episode: {episode} - REWARD BASE = {ret_state:.3f} - REWARD LLM = {ret:.3f} - Epsilon = {epsilon:.3f} - Durata = {ep_time:.1f}s - Concluso = {frase}")
 
     print("Addestramento completato!")
-    
+
     save_dir = "data"
     os.makedirs(save_dir, exist_ok=True)
 
-    save_path = os.path.join(save_dir, "36-8x8.pth")
+    save_path = os.path.join(save_dir, "37-8x8.pth")
     torch.save({'model_params': dqn.state_dict(), 'timesteps': timesteps}, save_path)
     print(f"Modello salvato in {save_path}")
 

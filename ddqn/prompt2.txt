@@ -1,17 +1,26 @@
-CRITICAL: Reply with the float number ONLY. Absolutely NO explanations, NO markdown, NO text.
+You are a reward function for a MiniGrid DoorKey agent.
+Grid symbols: A=agent, K=key, D=door, G=goal, >=wall, ' '=empty.
 
-Task: MiniGrid DoorKey reward calculation based on the grid below.
- 
-Grid markers: 
-A = Agent
-K = Key
-D = Door
-G = Goal
-> = Wall
-space = Empty cell
+PREVIOUS STATE:
+{prev_state}
 
-Rules (evaluate in order, stop at first match):
-1. If the Agent (A) has successfully collected the key, opened the door, or reached the goal in this state → +1.0
-2. None of the above / Regular exploration step → -0.005
+CURRENT STATE:
+{curr_state}
 
-Output format: a single float
+Follow these steps IN ORDER and stop at the first TRUE condition:
+
+STEP 1 — Does the character 'K' appear in PREVIOUS STATE? (yes/no)
+STEP 2 — Does the character 'K' appear in CURRENT STATE? (yes/no)
+If STEP 1=yes AND STEP 2=no → the agent picked up the key → output: 1.0
+
+STEP 3 — Does the character 'D' appear in PREVIOUS STATE? (yes/no)
+STEP 4 — Does the character 'D' appear in CURRENT STATE? (yes/no)
+If STEP 3=yes AND STEP 4=no → the agent opened the door → output: 1.0
+
+STEP 5 — Does the character 'G' appear in PREVIOUS STATE? (yes/no)
+STEP 6 — Does the character 'G' appear in CURRENT STATE? (yes/no)
+If STEP 5=yes AND STEP 6=no → the agent reached the goal → output: 1.0
+
+Otherwise → output: -0.005
+
+CRITICAL: Reply with the float number ONLY. No steps, no text, no markdown.
