@@ -15,7 +15,7 @@
     - [Convergenza](#convergenza)
     - [SARSA vs Q-Learning](#sarsa-vs-q-learning)
   - [Esplorazione vs Sfruttamento](#esplorazione-vs-sfruttamento)
-    - [ε-greedy](#-greedy)
+    - [ε-greedy](#ε-greedy)
     - [Softmax (Boltzmann)](#softmax-boltzmann)
   - [Parametri](#parametri)
   - [Setup dell'addestramento](#setup-delladdestramento)
