@@ -1,4 +1,4 @@
-# MODELLI VISUALI E LINGUISTCI PER DEFINIRE IL COMPORTAMENTO DI AGENTI INTELLIGENTI
+# Modelli visuali e linguistici per definire il comportamento di agenti intelligenti
 
 ## Indice
 - [1. Reinforcement Learning](#1-reinforcement-learning)
