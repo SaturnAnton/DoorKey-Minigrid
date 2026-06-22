@@ -23,6 +23,7 @@
   - [Training SARSA](#training-sarsa)
 - [4. Double DQN](#4-double-dqn)
 - [5. Implementazione LLM e VLM](#5-implementazione-llm-e-vlm)
+  - [Evoluzione dell'Architettura](#evoluzione-dellarchitettura)
 
 ---
 
@@ -212,7 +213,7 @@ Entrambi i set di esperimenti sono stati condotti per un totale di 5000 episodi,
 - Configurazione 2: Parametri impostati con α = 0.1, γ = 0.99. In questo caso, si è optato per una strategia di esplorazione iniziale più aggressiva, impostando ε oppure TEMP = 1.0. Inoltre, per concedere all’agente un orizzonte temporale più ampio per l’esplorazione casuale, il limite di passi è stato raddoppiato, portando il max_step a 500.
 
 ### Training Q-Learning
-Ho svolto il training dell'agente con le due configurazioni diverse per entrambi i metodi di esplorazione:
+È stato svolto il training dell'agente con le due configurazioni diverse per entrambi i metodi di esplorazione:
 - ε-greedy
   * Configurazione 1: dalla 1 alla 5
   * Configurazione 2: dalla 6 alla 10
@@ -223,7 +224,7 @@ Ho svolto il training dell'agente con le due configurazioni diverse per entrambi
 I risultati dei test sono disponibili nella cartella [Q-Learning](./figure/Q-Learning/).
 
 ### Training SARSA
-Ho svolto il training dell'agente con le due configurazioni diverse per entrambi i metodi di esplorazione:
+È stato svolto il training dell'agente con le due configurazioni diverse per entrambi i metodi di esplorazione:
 - ε-greedy
   * Configurazione 1: dalla 1 alla 5
   * Configurazione 2: dalla 6 alla 10
@@ -245,3 +246,22 @@ I risultati dei test sono disponibili nella cartella [SARSA](./figure/SARSA/).
 
 
 ## 5. Implementazione LLM e VLM
+
+Per superare il problema del reward sparso (nello scenario di default il reward veniva assegnato solo al raggiungimento del goal o al superamento del limite massimo di passi), si è deciso di integrare modelli linguistici e di visione (LLM e VLM) all'interno del loop di training della Double DQN. L'obiettivo è generare un reward denso a ogni singolo step di ciascun episodio, guidando l'agente in modo più efficace.
+
+Il processo di sviluppo ha seguito un'evoluzione iterativa per ottimizzare tempi di risposta e vincoli di computazione:
+
+### Evoluzione dell'Architettura
+
+* **1. VLM Locale (Approccio Iniziale)**
+    * *Tentativo:* Installazione di una VLM locale per testarne le capacità di analisi visiva dell'ambiente.
+    * *Criticità:* Tempi di inferenza eccessivamente lunghi, anche dopo aver effettuato il downgrade a un modello più leggero.
+* **2. VLM Cloud via Groq**
+    * *Tentativo:* Migrazione a un provider esterno (Groq) per sfruttare l'accelerazione hardware e ridurre la latenza.
+    * *Criticità:* Sebbene il tempo di risposta fosse migliorato, i limiti di Token Per Minute (TPM) e Request Per Minute (RPM) del piano gratuito hanno rallentato drasticamente il training globale.
+* **3. Transizione a LLM Cloud via Cerebras**
+    * *Tentativo:* Switch da VLM (Vision) a LLM (Text-only) per ridurre il consumo di token, permettendo l'esecuzione di un numero maggiore di episodi.
+    * *Criticità:* La dipendenza da API esterne esponeva comunque il sistema a limitazioni tariffarie giornaliere e orarie (Rate Limiting).
+* **4. LLM Locale e l'Ottimizzazione con Ollama**
+    * *Soluzione Finale:* Configurazione di un modello linguistico locale per eliminare la dipendenza dai provider esterni e sbloccare un training continuo senza limiti di richieste.
+    * *Risultato:* L'integrazione finale tramite Ollama ha abbattuto i tempi di risposta da ~2.0 secondi a soli 0.2 secondi per step. Questo incremento prestazionale ha permesso di scalare notevolmente il numero di episodi completati nell'unità di tempo.
