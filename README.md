@@ -1,13 +1,32 @@
 # MODELLI VISUALI E LINGUISTCI PER DEFINIRE IL COMPORTAMENTO DI AGENTI INTELLIGENTI
 
 ## Indice
-- [Reinforcement Learning](#reinforcement-learning)
-- [Ambiente Doorkey](#ambiente-doorkey)
-- [Algoritmi: Q-Table tabulare e SARSA](#algoritmi-q-table-tabulare-e-sarsa)
-- [Double DQN](#double-dqn)
-- [Implementazione LLM e VLM](#implementazione-llm-e-vlm)
+- [1. Reinforcement Learning](#1-reinforcement-learning)
+  - [Conoscenza del Modello](#conoscenza-del-modello)
+- [2. Ambiente Doorkey](#2-ambiente-doorkey)
+  - [Spazio delle azioni](#spazio-delle-azioni)
+- [3. Algoritmi: Q-Table tabulare e SARSA](#3-algoritmi-q-table-tabulare-e-sarsa)
+  - [Q-Learning](#q-learning)
+  - [Sample-based Q-Learning](#sample-based-q-learning)
+  - [Proprietà e Convergenza](#proprietà-e-convergenza)
+  - [Pseudocodice Q-Learning](#pseudocodice-q-learning)
+  - [SARSA](#sarsa)
+    - [Pseudocodice SARSA](#pseudocodice-sarsa)
+    - [Convergenza](#convergenza)
+    - [SARSA vs Q-Learning](#sarsa-vs-q-learning)
+  - [Esplorazione vs Sfruttamento](#esplorazione-vs-sfruttamento)
+    - [ε-greedy](#-greedy)
+    - [Softmax (Boltzmann)](#softmax-boltzmann)
+  - [Parametri](#parametri)
+  - [Setup dell'addestramento](#setup-delladdestramento)
+  - [Training Q-Learning](#training-q-learning)
+  - [Training SARSA](#training-sarsa)
+- [4. Double DQN](#4-double-dqn)
+- [5. Implementazione LLM e VLM](#5-implementazione-llm-e-vlm)
 
-## Reinforcement Learning
+---
+
+## 1. Reinforcement Learning
 Il Reinforcement Learning (RL) è un paradigma dell'apprendimento automatico in cui un agente intelligente impara a prendere decisioni ottimali interagendo con un ambiente, con l'obiettivo di massimizzare un segnale di ricompensa cumulativo nel tempo.
  
 I concetti fondamentali del RL includono:
@@ -17,14 +36,12 @@ I concetti fondamentali del RL includono:
 
 L'obiettivo formale del RL è la stima accurata della **funzione di valore** `V(s)` e l'individuazione della **policy ottima** `π*(s)`, ovvero la mappatura stato-azione che massimizza il valore atteso della ricompensa futura.
  
-Il problema è formalizzabile come un **Processo Decisionale di Markov (MDP)** in cui, a differenza della pianificazione classica:
+Il problema è formalizzabile como un **Processo Decisionale di Markov (MDP)** in cui, a differenza della pianificazione classica:
  
 - La funzione di ricompensa `R(s, a, s')` è incognita.
-- Le probabilità di transizione tra stati `T(s, a, s')` (la dinamica dell'ambiente) sono incognite.
+- La probabilità di transizione tra stati `T(s, a, s')` (la dinamica dell'ambiente) sono incognite.
 
 Di conseguenza, l'agente deve acquisire campioni empirici provando azioni e raccogliendo le relative ricompense.
- 
----
  
 ### Conoscenza del Modello
  
@@ -36,9 +53,11 @@ Le strategie per risolvere problemi di RL si dividono in due categorie principal
 | **Vantaggi** | Maggiore efficienza di campionamento (sample efficiency); può pianificare riducendo l'interazione con stati negativi | Più semplice da implementare; bias inferiore |
 | **Svantaggi** | Computazionalmente più complesso | Richiede una maggiore quantità di dati per convergere |
 
+<br><br>
+
 ---
 
-## Ambiente Doorkey
+## 2. Ambiente Doorkey
 Per valutare le performance dell'agente è stato scelto l'ambiente DoorKey, della libreria MiniGrid. Questo ambiente presenta una chiave che l'agente deve raccogliere per sbloccare la porta e successivamente deve arrivare al quadrato verde che rappresenta il goal finale. Infatti la missione di questo ambiente è riassunta come: "usa la chiave per aprire la porta e poi raggiungi il goal". Poiché la ricompensa viene fornita esclusivamente al completamento del task finale (ricompensa sparsa), l'ambiente rappresenta un'ottima sfida per testare le capacità di esplorazione dell'algoritmo.
 
 Il reward di questo ambiente può essere solo di due tipi:
@@ -62,9 +81,11 @@ Le azioni possibili all'interno di questo ambiente sono 7, identificate da un nu
 | 5 | TOGGLE | Interagire con un oggetto (aprire la porta) |
 | 6 | DONE | Terminazione volontaria |
 
+<br><br>
+
 ---
 
-## Algoritmi: Q-Table tabulare e SARSA
+## 3. Algoritmi: Q-Table tabulare e SARSA
 
 ### Q-Learning
  
@@ -132,11 +153,11 @@ Repeat (for each episode):
   until S is terminal
 ```
 
-#### Convergenza
+##### Convergenza
 
 SARSA converge alla policy ottima `Q*(s, a)` se, nel limite, la policy converge alla policy greedy **e** tutte le coppie stato-azione vengono visitate infinite volte.
 
-#### SARSA vs Q-Learning
+##### SARSA vs Q-Learning
 
 | | Q-Learning | SARSA |
 |---|---|---|
@@ -147,8 +168,6 @@ SARSA converge alla policy ottima `Q*(s, a)` se, nel limite, la policy converge 
 | **Rischio** | Può fallire occasionalmente con ε-greedy | Più cauto, evita azioni rischiose |
 
 Il classico esempio del **Cliff Walking** mostra questa differenza: Q-Learning impara il percorso ottimo teorico ma ci cade occasionalmente a causa dell'esplorazione ε-greedy, mentre SARSA apprende un percorso leggermente più lungo ma più sicuro, ottenendo una ricompensa cumulativa migliore durante il training.
-
----
  
 ### Esplorazione vs Sfruttamento
  
@@ -159,11 +178,11 @@ Un pilastro fondamentale del Reinforcement Learning è il delicato compromesso t
 
 Per garantire la convergenza a un risultato ottimo, è necessario esplorare tutte le coppie stato-azione con sufficiente frequenza nel lungo periodo. I principali metodi utilizzati nella pratica sono:
  
-### ε-greedy
+#### ε-greedy
  
 Scegliere l'azione in modo greedy per la maggior parte del tempo (con probabilità `1 - ε`) e selezionare un'azione casuale con probabilità `ε`.
  
-### Softmax (Boltzmann)
+#### Softmax (Boltzmann)
  
 Assegna una probabilità di selezione a ciascuna azione ponderandola in base al suo valore atteso `Q(s,a)`. La probabilità di scegliere l'azione `a` nello stato `s` è:
  
@@ -176,25 +195,21 @@ Il parametro **T** (temperatura) agisce da modulatore del grado di esplorazione:
 | T elevata   | Tutte le azioni hanno probabilità simili → **massima esplorazione** |
 | T bassa     | L'azione con Q più alto ha probabilità maggiore → **massimo sfruttamento** |
  
----
- 
 ### Parametri
  
 | Parametro | Simbolo | Descrizione |
 |-----------|---------|-------------|
 | Episodi | — | Sequenze complete di interazioni agente-ambiente, dall'inizio fino allo stato terminale o al limite massimo di passi (`max_steps`). |
 | Learning Rate | α | Determina il peso delle nuove informazioni rispetto a quelle passate. Regola la velocità di aggiornamento dei valori nella Q-table. |
-| Discount Factor | γ | Definisce l'importanza delle ricompense future; un valore vicino a 1 orienta l'agente verso una strategia di lungo periodo. |
+| Discount Factor | γ | Definisce l'importance delle ricompense future; un valore vicino a 1 orienta l'agente verso una strategia di lungo periodo. |
 | Exploration Rate | ε | Probabilità di scegliere un'azione casuale invece di quella ottimale stimata; fondamentale per esplorare l'ambiente. |
 | Temperatura | T | Regola il grado di esplorazione nella strategia softmax, bilanciando l'estrazione casuale di azioni con la preferenza per quelle con valori Q più alti. |
 
----
 ### Setup dell'addestramento
-La fase di addestramento è stata strutturata in due diverse configurazioni sperimentali per valutare l’impatto dei parametri esplorativi e della durata massima degli episodi sulle
-performance di convergenza dell’agente. 
+La fase di addestramento è stata strutturata in due diverse configurazioni sperimentali per valutare l’impatto dei parametri esplorativi e della durata massima degli episodi sulle performance di convergenza dell’agente. 
 Entrambi i set di esperimenti sono stati condotti per un totale di 5000 episodi, mantenendo costanti il learning rate (α) e il fattore di sconto (γ). I test sono stati suddivisi come segue:
-- Configurazione 1: Parametri impostati con α = 0.1, γ = 0.99 ed un tasso di esplorazione iniziale ε oppure T EMP = 0.9. Il limite massimo di passi per episodio(max_step) è stato mantenuto al valore di default dell’ambiente, pari a 250.
-- Configurazione 2: Parametri impostati con α = 0.1, γ = 0.99. In questo caso,si è optato per una strategia di esplorazione iniziale più aggressiva, impostando ε oppure TEMP = 1.0. Inoltre, per concedere all’agente un orizzonte temporale più ampio per l’esplorazione casuale, il limite di passi è stato raddoppiato, portando il max_step a 500.
+- Configurazione 1: Parametri impostati con α = 0.1, γ = 0.99 ed un tasso di esplorazione iniziale ε oppure TEMP = 0.9. Il limite massimo di passi per episodio (max_step) è stato mantenuto al valore di default dell’ambiente, pari a 250.
+- Configurazione 2: Parametri impostati con α = 0.1, γ = 0.99. In questo caso, si è optato per una strategia di esplorazione iniziale più aggressiva, impostando ε oppure TEMP = 1.0. Inoltre, per concedere all’agente un orizzonte temporale più ampio per l’esplorazione casuale, il limite di passi è stato raddoppiato, portando il max_step a 500.
 
 ### Training Q-Learning
 Ho svolto il training dell'agente con le due configurazioni diverse per entrambi i metodi di esplorazione:
@@ -205,6 +220,8 @@ Ho svolto il training dell'agente con le due configurazioni diverse per entrambi
   * Configurazione 2: dalla 11 alla 15
   * Configurazione 1: dalla 16 alla 20
 
+I risultati dei test sono disponibili nella cartella [Q-Learning](./figure/Q-Learning/).
+
 ### Training SARSA
 Ho svolto il training dell'agente con le due configurazioni diverse per entrambi i metodi di esplorazione:
 - ε-greedy
@@ -214,7 +231,17 @@ Ho svolto il training dell'agente con le due configurazioni diverse per entrambi
   * Configurazione 2: dalla 11 alla 15
   * Configurazione 1: dalla 16 alla 20
 
+I risultati dei test sono disponibili nella cartella [SARSA](./figure/SARSA/).
 
-## Double DQN
+<br><br>
 
-## Implementazione LLM e VLM
+---
+
+## 4. Double DQN
+
+<br><br>
+
+---
+
+
+## 5. Implementazione LLM e VLM
