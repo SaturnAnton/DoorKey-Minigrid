@@ -196,11 +196,13 @@ def train():
                 action = np.argmax(net_out)
 
             prev_state_str = grid_to_str(env)
+            print("PREV" + prev_state_str)
 
             next_state, state_reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
 
             curr_state_str = grid_to_str(env)
+            print("CURR"+ curr_state_str)
 
             reward = reward_llm(prev_state_str, curr_state_str, client, prompt)
             if reward != -0.005:

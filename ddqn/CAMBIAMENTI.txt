@@ -1,0 +1,9 @@
+- Guardare box drawing character per la rappresentazione dell'ambiente: disegnare i muri in doppio
+- reward in base alla distanza
+- nuova funzione
+- salvare gli stati offline
+- prendere i valori del file 22, mettere in test.py la fnzione di grid-to.str aggiornata , salvare i riusltati in una cartella con tempo e orario
+    da step 1, numero di episodi di test = 1, poi dai il file di testo con le info ad una llm per vedere se restituisce i giusti reward
+- passare ogni singola immagine dello step singolarmente per poi vedere se restituisce il rewaed giusto
+- più sei vicino all'oggetto più il reward è alto, funzione 1/x dove x è la manhattan distance
+- serve solo uno stato
