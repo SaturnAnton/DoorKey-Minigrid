@@ -5,7 +5,7 @@
   - [Conoscenza del Modello](#conoscenza-del-modello)
 - [2. Ambiente Doorkey](#2-ambiente-doorkey)
   - [Spazio delle azioni](#spazio-delle-azioni)
-- [3. Algoritmi: Q-Table tabulare e SARSA](#3-algoritmi-q-table-tabulare-e-sarsa)
+- [3. Algoritmi: Q-Learning tabulare e SARSA](#3-algoritmi-q-learning-tabulare-e-sarsa)
   - [Q-Learning](#q-learning)
   - [Sample-based Q-Learning](#sample-based-q-learning)
   - [Proprietà e Convergenza](#proprietà-e-convergenza)
@@ -86,7 +86,7 @@ Le azioni possibili all'interno di questo ambiente sono 7, identificate da un nu
 
 ---
 
-## 3. Algoritmi: Q-Table tabulare e SARSA
+## 3. Algoritmi: Q-Learning tabulare e SARSA
 
 ### Q-Learning
  
@@ -254,14 +254,14 @@ Il processo di sviluppo ha seguito un'evoluzione iterativa per ottimizzare tempi
 ### Evoluzione dell'Architettura
 
 * **1. VLM Locale (Approccio Iniziale)**
-    * *Tentativo:* Installazione di una VLM locale per testarne le capacità di analisi visiva dell'ambiente.
-    * *Criticità:* Tempi di inferenza eccessivamente lunghi, anche dopo aver effettuato il downgrade a un modello più leggero.
+    * Tentativo: Installazione di una VLM locale per testarne le capacità di analisi visiva dell'ambiente.
+    * Criticità: Tempi di inferenza eccessivamente lunghi, anche dopo aver effettuato il downgrade a un modello più leggero.
 * **2. VLM Cloud via Groq**
-    * *Tentativo:* Migrazione a un provider esterno (Groq) per sfruttare l'accelerazione hardware e ridurre la latenza.
-    * *Criticità:* Sebbene il tempo di risposta fosse migliorato, i limiti di Token Per Minute (TPM) e Request Per Minute (RPM) del piano gratuito hanno rallentato drasticamente il training globale.
+    * Tentativo: Migrazione a un provider esterno (Groq) per sfruttare l'accelerazione hardware e ridurre la latenza.
+    * Criticità: Sebbene il tempo di risposta fosse migliorato, i limiti di Token Per Minute (TPM) e Request Per Minute (RPM) del piano gratuito hanno rallentato drasticamente il training globale.
 * **3. Transizione a LLM Cloud via Cerebras**
-    * *Tentativo:* Switch da VLM (Vision) a LLM (Text-only) per ridurre il consumo di token, permettendo l'esecuzione di un numero maggiore di episodi.
-    * *Criticità:* La dipendenza da API esterne esponeva comunque il sistema a limitazioni tariffarie giornaliere e orarie (Rate Limiting).
+    * Tentativo: Switch da VLM (Vision) a LLM (Text-only) per ridurre il consumo di token, permettendo l'esecuzione di un numero maggiore di episodi.
+    * Criticità: La dipendenza da API esterne esponeva comunque il sistema a limitazioni tariffarie giornaliere e orarie (Rate Limiting).
 * **4. LLM Locale e l'Ottimizzazione con Ollama**
-    * *Soluzione Finale:* Configurazione di un modello linguistico locale per eliminare la dipendenza dai provider esterni e sbloccare un training continuo senza limiti di richieste.
-    * *Risultato:* L'integrazione finale tramite Ollama ha abbattuto i tempi di risposta da ~2.0 secondi a soli 0.2 secondi per step. Questo incremento prestazionale ha permesso di scalare notevolmente il numero di episodi completati nell'unità di tempo.
+    * Soluzione Finale: Configurazione di un modello linguistico locale per eliminare la dipendenza dai provider esterni e sbloccare un training continuo senza limiti di richieste.
+    * Risultato: L'integrazione finale tramite Ollama ha abbattuto i tempi di risposta da ~2.0 secondi a soli 0.2 secondi per step. Questo incremento prestazionale ha permesso di scalare notevolmente il numero di episodi completati nell'unità di tempo.
