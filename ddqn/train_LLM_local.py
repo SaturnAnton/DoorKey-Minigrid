@@ -7,6 +7,7 @@ from openai import OpenAI
 from env import MinigridDoorKeyFullyObs
 from model import CnnMinigridPolicy, ReplayBuffer
 import time
+import re
 
 OLLAMA_MODEL = "llama3.2:3b"   
 OLLAMA_BASE_URL = "http://localhost:11434/v1"
@@ -16,65 +17,79 @@ def grid_to_str(env):
     width = env.unwrapped.width
     height = env.unwrapped.height
     agent_pos = env.unwrapped.agent_pos
+    carrying = env.unwrapped.carrying
+
+    has_key = carrying is not None and carrying.type == 'key'
 
     SYMBOLS = {
-        'wall':   '>',
+        'wall':   '▇',
         'door':   'D',
         'key':    'K',
         'goal':   'G',
-        'lava':   'L',
         None:     ' ',
     }
 
+    horizontal_border = '+' + '---+' * width
     rows = []
+
     for y in range(height):
-        row = ''
+        rows.append(horizontal_border)
+        row_content = '|'
         for x in range(width):
             if (x, y) == tuple(agent_pos):
-                row += 'A'
+                row_content += f" { 'L' if has_key else 'A' } |"
             else:
                 cell = grid.get(x, y)
                 obj_type = cell.type if cell is not None else None
-                row += SYMBOLS.get(obj_type, '?')
-        rows.append(row)
-
+                
+                if obj_type == 'door' and cell.is_open:
+                    symbol = ' '
+                else:
+                    symbol = SYMBOLS.get(obj_type, ' ')
+                    
+                row_content += f" {symbol} |"
+        rows.append(row_content)
+    
+    rows.append(horizontal_border)
     return '\n'.join(rows)
 
 def hard_update(local_model, target_model):
     target_model.load_state_dict(local_model.state_dict())
 
-def reward_llm(prev_state, curr_state, client, prompt, max_retries=8):
-    full_prompt = (
-        prompt
-        .replace("{prev_state}", prev_state)
-        .replace("{curr_state}", curr_state)
-    )
-    messages = [{"role": "user", "content": full_prompt}]
+def reward_llm(state, client, prompt, max_retries=8):
+    messages = [
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": f"CURRENT STATE:\n{state}"}
+    ]
 
     for attempt in range(max_retries):
         try:
             chat_response = client.chat.completions.create(
                 model=OLLAMA_MODEL,
                 messages=messages,
-                max_tokens=16,       
+                max_tokens=64,       
                 temperature=0.0,
                 top_p=1.0,
-                stop=["\n", " \n"],
                 timeout=10.0,
             )
-            risposta = chat_response.choices[0].message.content.strip()
+            raw_content = chat_response.choices[0].message.content.strip()
 
-            risposta = risposta.replace("`", "").replace("'", "").replace('"', "").strip()
+            numbers = re.findall(r'-?\.?\d+\.?\d*', raw_content)
 
-            try:
-                val = float(risposta)
-                if val not in (1.0, -0.005):
-                    print(f"[Parsing] Valore inatteso: '{val}' → reward = -0.005")
-                    return -0.005
-                return val
-            except ValueError:
-                print(f"[Parsing] Risposta non numerica: '{risposta}' → reward = -0.005")
-                return -0.005
+            if numbers:
+                risposta = numbers[-1]
+                try:
+                    val = float(risposta)
+                    if val > 0 or val == -0.005:
+                        return val
+                    else:
+                        print(f"[Parsing] Valore non conforme: '{val}' → reward = -0.005")
+                        return -0.005
+                except ValueError:
+                    pass
+
+            print(f"[Parsing] Nessun numero trovato nell'output dell'LLM → reward = -0.005")
+            return -0.005
 
         except Exception as e:
             wait = min(2 ** attempt, 5)
@@ -183,8 +198,6 @@ def train():
         episode_transitions = []
         ep_start = time.perf_counter()
 
-        count = 0
-
         while not done:
             epsilon = max(epsilon_lb, epsilon_ub - timesteps / epsilon_decay)
 
@@ -195,19 +208,13 @@ def train():
                 net_out = dqn(state_tensor).detach().cpu().numpy()
                 action = np.argmax(net_out)
 
-            prev_state_str = grid_to_str(env)
-            print("PREV" + prev_state_str)
+            state_str = grid_to_str(env)
+            print(state_str)
+            reward = reward_llm(state_str, client, prompt)
+            print(reward)
 
             next_state, state_reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
-
-            curr_state_str = grid_to_str(env)
-            print("CURR"+ curr_state_str)
-
-            reward = reward_llm(prev_state_str, curr_state_str, client, prompt)
-            if reward != -0.005:
-                print(f"[Reward positivo] step={timesteps} reward={reward}")
-                count += 1
 
             ret += reward
             ret_state += state_reward
@@ -262,9 +269,8 @@ def train():
         all_rewards.append(ret)
         state_rewards.append(ret_state)
 
-        frase = "SI" if count == 3 else "NO"
         ep_time = time.perf_counter() - ep_start
-        print(f"Episode: {episode} - REWARD BASE = {ret_state:.3f} - REWARD LLM = {ret:.3f} - Epsilon = {epsilon:.3f} - Durata = {ep_time:.1f}s - Concluso = {frase}")
+        print(f"Episode: {episode} - REWARD BASE = {ret_state:.3f} - REWARD LLM = {ret:.3f} - Epsilon = {epsilon:.3f} - Durata = {ep_time:.1f}s")
 
     print("Addestramento completato!")
 
