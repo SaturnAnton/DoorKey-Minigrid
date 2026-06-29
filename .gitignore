@@ -8,6 +8,8 @@
 *.synctex.gz
 *.gz
 *.auxlock
+*.pdf
+*.tex
 .venv 
 venv/
 __pycache__
