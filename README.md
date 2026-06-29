@@ -340,7 +340,25 @@ I risultati dei test sono disponibili nella cartella [SARSA](./figure/SARSA/).
 ---
 
 ## 4. Double DQN
+Il Q-Learning tabulare mantiene una tabella esplicita dei valori Q per ogni coppia stato-azione, il che lo rende inapplicabile in contesti con spazi di azione continui o ad alta dimensionalità, dove il numero di combinazioni possibili diventa intrattabile. Per superare questo limite, si ricorre al [Deep Q-Network (DQN)](https://web.stanford.edu/class/psych209/Readings/MnihEtAlHassibis15NatureControlDeepRL.pdf), che sostituisce la Q-table con una rete neurale in grado di approssimare la funzione Q su spazi continui, rendendo possibile l'apprendimento in ambienti molto più complessi. Lo pseudocodice del DQN è il seguente:
 
+```
+Initialize weights w and w ’ randomly in [ -1 , 1]
+Initialize s { observe current state }
+loop
+  Select and execute action a
+  Observe new state s ’ receive immediate reward r
+  Add (s , a , s ’, r ) to experience buffer
+  Sample mini - batch MB of experiences from buffer
+  for ( s_hat , a_hat , s ’, r_hat ) in MiniBatch do
+    grad = ( Q_w ( s_hat , a_hat ) - r_hat - gamma * max_a_hat ’( Q_w_hat (
+    s_hat ’ , a_hat ’) )) * partial Q_w ( s_hat , a_hat )/ partial w
+    update weights w <- w - alpha * grad
+  end for
+  update state s <- s ’
+  every c steps , update target : w <- w
+end loop
+```
 <br><br>
 
 ---
