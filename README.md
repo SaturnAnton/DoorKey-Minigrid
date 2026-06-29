@@ -216,10 +216,58 @@ Entrambi i set di esperimenti sono stati condotti per un totale di 5000 episodi,
 È stato svolto il training dell'agente con le due configurazioni diverse per entrambi i metodi di esplorazione:
 - ε-greedy
   * Configurazione 1: dalla 1 alla 5
+    <table align="center" width="100%">
+      <tr>
+        <td align="center"><img src="figure/Q-Learning/qtable1.png" width="100%"/></td>
+        <td align="center"><img src="figure/Q-Learning/qtable2.png" width="100%"/></td>
+        <td align="center"><img src="figure/Q-Learning/qtable3.png" width="100%"/></td>
+      </tr>
+      <tr>
+        <td align="center"><img src="figure/Q-Learning/qtable4.png" width="100%"/></td>
+        <td align="center"><img src="figure/Q-Learning/qtable5.png" width="100%"/></td>
+        <td></td>
+      </tr>
+    </table>
   * Configurazione 2: dalla 6 alla 10
+    <table align="center" width="100%">
+      <tr>
+        <td align="center"><img src="figure/Q-Learning/qtable6.png" width="100%"/></td>
+        <td align="center"><img src="figure/Q-Learning/qtable7.png" width="100%"/></td>
+        <td align="center"><img src="figure/Q-Learning/qtable8.png" width="100%"/></td>
+      </tr>
+      <tr>
+        <td align="center"><img src="figure/Q-Learning/qtable9.png" width="100%"/></td>
+        <td align="center"><img src="figure/Q-Learning/qtable10.png" width="100%"/></td>
+        <td></td>
+      </tr>
+    </table>
 - Softmax
   * Configurazione 2: dalla 11 alla 15
+    <table align="center" width="100%">
+      <tr>
+        <td align="center"><img src="figure/Q-Learning/qtable11.png" width="100%"/></td>
+        <td align="center"><img src="figure/Q-Learning/qtable12.png" width="100%"/></td>
+        <td align="center"><img src="figure/Q-Learning/qtable13.png" width="100%"/></td>
+      </tr>
+      <tr>
+        <td align="center"><img src="figure/Q-Learning/qtable14.png" width="100%"/></td>
+        <td align="center"><img src="figure/Q-Learning/qtable15.png" width="100%"/></td>
+        <td></td>
+      </tr>
+    </table>
   * Configurazione 1: dalla 16 alla 20
+    <table align="center" width="100%">
+      <tr>
+        <td align="center"><img src="figure/Q-Learning/qtable16.png" width="100%"/></td>
+        <td align="center"><img src="figure/Q-Learning/qtable17.png" width="100%"/></td>
+        <td align="center"><img src="figure/Q-Learning/qtable18.png" width="100%"/></td>
+      </tr>
+      <tr>
+        <td align="center"><img src="figure/Q-Learning/qtable19.png" width="100%"/></td>
+        <td align="center"><img src="figure/Q-Learning/qtable20.png" width="100%"/></td>
+        <td></td>
+      </tr>
+    </table>
 
 I risultati dei test sono disponibili nella cartella [Q-Learning](./figure/Q-Learning/).
 
@@ -227,10 +275,58 @@ I risultati dei test sono disponibili nella cartella [Q-Learning](./figure/Q-Lea
 È stato svolto il training dell'agente con le due configurazioni diverse per entrambi i metodi di esplorazione:
 - ε-greedy
   * Configurazione 1: dalla 1 alla 5
+    <table align="center" width="100%">
+      <tr>
+        <td align="center"><img src="figure/SARSA/sarsa1.png" width="100%"/></td>
+        <td align="center"><img src="figure/SARSA/sarsa2.png" width="100%"/></td>
+        <td align="center"><img src="figure/SARSA/sarsa3.png" width="100%"/></td>
+      </tr>
+      <tr>
+        <td align="center"><img src="figure/SARSA/sarsa4.png" width="100%"/></td>
+        <td align="center"><img src="figure/SARSA/sarsa5.png" width="100%"/></td>
+        <td></td>
+      </tr>
+    </table>
   * Configurazione 2: dalla 6 alla 10
+    <table align="center" width="100%">
+      <tr>
+        <td align="center"><img src="figure/SARSA/sarsa6.png" width="100%"/></td>
+        <td align="center"><img src="figure/SARSA/sarsa7.png" width="100%"/></td>
+        <td align="center"><img src="figure/SARSA/sarsa8.png" width="100%"/></td>
+      </tr>
+      <tr>
+        <td align="center"><img src="figure/SARSA/sarsa9.png" width="100%"/></td>
+        <td align="center"><img src="figure/SARSA/sarsa10.png" width="100%"/></td>
+        <td></td>
+      </tr>
+    </table>
 - Softmax
   * Configurazione 2: dalla 11 alla 15
+    <table align="center" width="100%">
+      <tr>
+        <td align="center"><img src="figure/SARSA/sarsa11.png" width="100%"/></td>
+        <td align="center"><img src="figure/SARSA/sarsa12.png" width="100%"/></td>
+        <td align="center"><img src="figure/SARSA/sarsa13.png" width="100%"/></td>
+      </tr>
+      <tr>
+        <td align="center"><img src="figure/SARSA/sarsa14.png" width="100%"/></td>
+        <td align="center"><img src="figure/SARSA/sarsa15.png" width="100%"/></td>
+        <td></td>
+      </tr>
+    </table>
   * Configurazione 1: dalla 16 alla 20
+    <table align="center" width="100%">
+      <tr>
+        <td align="center"><img src="figure/SARSA/sarsa16.png" width="100%"/></td>
+        <td align="center"><img src="figure/SARSA/sarsa17.png" width="100%"/></td>
+        <td align="center"><img src="figure/SARSA/sarsa18.png" width="100%"/></td>
+      </tr>
+      <tr>
+        <td align="center"><img src="figure/SARSA/sarsa19.png" width="100%"/></td>
+        <td align="center"><img src="figure/SARSA/sarsa20.png" width="100%"/></td>
+        <td></td>
+      </tr>
+    </table>
 
 I risultati dei test sono disponibili nella cartella [SARSA](./figure/SARSA/).
 
