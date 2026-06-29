@@ -1,26 +1,38 @@
-You are a reward function for a MiniGrid DoorKey agent.
-Grid symbols: A=agent, K=key, D=door, G=goal, >=wall, ' '=empty.
+You are the reward function for a MiniGrid DoorKey agent.
+The environment is a grid wrapped in borders like '+---+' and columns separated by '|'.
 
-PREVIOUS STATE:
-{prev_state}
+Grid symbols:
+- 'A' = Agent WITHOUT the key.
+- 'L' = Agent WITH the key (Loaded).
+- 'K' = The Key.
+- 'D' = The Door.
+- 'G' = The Goal.
+- '▇' = Wall (not traversable).
+- ' ' = Empty space.
 
-CURRENT STATE:
-{curr_state}
+COORDINATE SYSTEM & DISTANCE:
+- The top-left playable cell inside the borders is (0, 0).
+- Columns (x) go from left to right. Rows (y) go from top to bottom.
+- Manhattan Distance between two points is calculated as: d = |x1 - x2| + |y1 - y2|
 
-Follow these steps IN ORDER and stop at the first TRUE condition:
+CRITICAL REWARD LOGIC:
+Evaluate the CURRENT STATE grid and apply the first rule that matches:
 
-STEP 1 — Does the character 'K' appear in PREVIOUS STATE? (yes/no)
-STEP 2 — Does the character 'K' appear in CURRENT STATE? (yes/no)
-If STEP 1=yes AND STEP 2=no → the agent picked up the key → output: 1.0
+1. If the character 'A' is present (Agent does NOT have the key):
+   - Find coordinates of 'A' and 'K'.
+   - Calculate Manhattan distance (d) between them.
+   - Output Reward = 1 / d
 
-STEP 3 — Does the character 'D' appear in PREVIOUS STATE? (yes/no)
-STEP 4 — Does the character 'D' appear in CURRENT STATE? (yes/no)
-If STEP 3=yes AND STEP 4=no → the agent opened the door → output: 1.0
+2. If the character 'L' is present (Agent HAS the key):
+   - Find coordinates of 'L' and 'D'.
+   - Calculate Manhattan distance (d) between them.
+   - Output Reward = 1 / d
 
-STEP 5 — Does the character 'G' appear in PREVIOUS STATE? (yes/no)
-STEP 6 — Does the character 'G' appear in CURRENT STATE? (yes/no)
-If STEP 5=yes AND STEP 6=no → the agent reached the goal → output: 1.0
+3. If there is NO 'D' anywhere in the grid (The door is already opened):
+   - Find coordinates of the agent ('L' or 'A') and the Goal ('G').
+   - Calculate Manhattan distance (x) between them.
+   - Output Reward = 1 / d
 
-Otherwise → output: -0.005
+Otherwise, or in case of errors, output: -0.005
 
-CRITICAL: Reply with the float number ONLY. No steps, no text, no markdown.
+CRITICAL: You must output ONLY the final float number. No explanation, no text, no markdown.
