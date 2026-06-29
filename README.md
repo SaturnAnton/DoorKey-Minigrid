@@ -61,6 +61,11 @@ Le strategie per risolvere problemi di RL si dividono in due categorie principal
 ## 2. Ambiente Doorkey
 Per valutare le performance dell'agente è stato scelto l'ambiente DoorKey, della libreria MiniGrid. Questo ambiente presenta una chiave che l'agente deve raccogliere per sbloccare la porta e successivamente deve arrivare al quadrato verde che rappresenta il goal finale. Infatti la missione di questo ambiente è riassunta come: "usa la chiave per aprire la porta e poi raggiungi il goal". Poiché la ricompensa viene fornita esclusivamente al completamento del task finale (ricompensa sparsa), l'ambiente rappresenta un'ottima sfida per testare le capacità di esplorazione dell'algoritmo.
 
+<div align="center">
+  <img src="figure/env.png" alt="Ambiente di gioco" width="200">
+  <p><i>Visualizzazione dell'ambiente DoorKey in MiniGrid</i></p>
+</div>
+
 Il reward di questo ambiente può essere solo di due tipi:
 - `1 − 0.9 · (step_count/max_steps)` se raggiunge il goal.
 - `0` se fallisce.
