@@ -5,7 +5,7 @@
   - [Conoscenza del Modello](#conoscenza-del-modello)
 - [2. Ambiente Doorkey](#2-ambiente-doorkey)
   - [Spazio delle azioni](#spazio-delle-azioni)
-- [3. Algoritmi: Q-Learning tabulare e SARSA](#3-algoritmi-q-learning-tabulare-e-sarsa)
+- [3. Algoritmi: Q-Learning e SARSA (tabulare)](#3-algoritmi-q-learning-tabulare-e-sarsa)
   - [Q-Learning](#q-learning)
   - [Sample-based Q-Learning](#sample-based-q-learning)
   - [Proprietà e Convergenza](#proprietà-e-convergenza)
@@ -91,7 +91,7 @@ Le azioni possibili all'interno di questo ambiente sono 7, identificate da un nu
 
 ---
 
-## 3. Algoritmi: Q-Learning tabulare e SARSA
+## 3. Algoritmi: Q-Learning e SARSA (tabulare)
 
 ### Q-Learning
  
