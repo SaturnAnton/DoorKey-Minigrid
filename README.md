@@ -22,6 +22,9 @@
   - [Training Q-Learning](#training-q-learning)
   - [Training SARSA](#training-sarsa)
 - [4. Double DQN](#4-double-dqn)
+  - [Architettura della rete neurale](#architettura-della-rete-neurale)
+    - [Blocco convoluzionale](#blocco-convoluzionale)
+    - [Blocco fully-connected](#blocco-fully-connected-denso)
 - [5. Implementazione LLM e VLM](#5-implementazione-llm-e-vlm)
   - [Evoluzione dell'Architettura](#evoluzione-dellarchitettura)
 
@@ -359,6 +362,28 @@ loop
   every c steps , update target : w <- w
 end loop
 ```
+
+### Architettura della rete neurale
+
+Come rete neurale è stata implementata una **rete neurale convoluzionale (CNN)**. Una CNN è un tipo di rete neurale particolarmente adatta all'elaborazione di dati con struttura a griglia, come le immagini: invece di collegare ogni neurone a tutti i pixel in ingresso (come avviene nelle reti completamente connesse), utilizza dei filtri (kernel) che scorrono sull'immagine per estrarre caratteristiche locali come bordi, forme e pattern. Questo permette di catturare le relazioni spaziali tra i pixel riducendo drasticamente il numero di parametri da addestrare rispetto a una rete densa equivalente. L'architettura di questa rete è formata da un blocco convoluzionale e un blocco fully-connected.
+
+#### Blocco convoluzionale
+
+Composto da due layer `Conv2d`, ognuno seguito da un'attivazione `ReLU`:
+
+- Il **primo layer** prende in ingresso l'immagine con `C` canali (a seconda della rappresentazione dell'ambiente) e produce **32 mappe di caratteristiche** (feature map), applicando filtri di dimensione 3x3 con padding 1 (in modo da mantenere invariate altezza e larghezza dell'immagine).
+- Il **secondo layer** prende le 32 mappe e ne produce **64**, sempre con un filtro 3x3 e padding 1.
+
+Lo scopo di questi layer è estrarre progressivamente caratteristiche visive sempre più astratte dall'immagine dell'ambiente di gioco.
+
+#### Blocco fully-connected (denso)
+
+Dopo i layer convoluzionali, l'output viene appiattito (`flatten`) in un unico vettore e passato attraverso tre layer lineari:
+
+- Il **primo** riduce il vettore a **256 neuroni**, seguito da una `ReLU`.
+- Il **secondo** lo riduce ulteriormente a **64 neuroni**, anch'esso seguito da una `ReLU`.
+- Il **terzo e ultimo layer** produce in uscita `num_actions` valori (uno per ogni azione possibile dell'agente), senza attivazione, poiché questi valori rappresentano direttamente i **Q-value** stimati per ciascuna azione.
+
 <br><br>
 
 ---
