@@ -388,7 +388,7 @@ Dopo i layer convoluzionali, l'output viene appiattito (`flatten`) in un unico v
 - Il **terzo e ultimo layer** produce in uscita `num_actions` valori (uno per ogni azione possibile dell'agente), senza attivazione, poiché questi valori rappresentano direttamente i **Q-value** stimati per ciascuna azione.
 
 ### Double DQN
-
+//TO DO 
 
 <br><br>
 
@@ -415,3 +415,5 @@ Il processo di sviluppo ha seguito un'evoluzione iterativa per ottimizzare tempi
 * **4. LLM Locale e l'Ottimizzazione con Ollama**
     * Soluzione Finale: Configurazione di un modello linguistico locale per eliminare la dipendenza dai provider esterni e sbloccare un training continuo senza limiti di richieste.
     * Risultato: L'integrazione finale tramite Ollama ha abbattuto i tempi di risposta da ~2.0 secondi a soli 0.2 secondi per step. Questo incremento prestazionale ha permesso di scalare notevolmente il numero di episodi completati nell'unità di tempo.
+ 
+//TO DO 
