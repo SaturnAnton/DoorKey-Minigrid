@@ -22,9 +22,11 @@
   - [Training Q-Learning](#training-q-learning)
   - [Training SARSA](#training-sarsa)
 - [4. Double DQN](#4-double-dqn)
+  - [Deep Q-Network (DQN)](#deep-q-network-dqn)
   - [Architettura della rete neurale](#architettura-della-rete-neurale)
     - [Blocco convoluzionale](#blocco-convoluzionale)
     - [Blocco fully-connected](#blocco-fully-connected-denso)
+  - [Double DQN](#double-dqn)
 - [5. Implementazione LLM e VLM](#5-implementazione-llm-e-vlm)
   - [Evoluzione dell'Architettura](#evoluzione-dellarchitettura)
 
@@ -343,6 +345,7 @@ I risultati dei test sono disponibili nella cartella [SARSA](./figure/SARSA/).
 ---
 
 ## 4. Double DQN
+### Deep Q-Network (DQN)
 Il Q-Learning tabulare mantiene una tabella esplicita dei valori Q per ogni coppia stato-azione, il che lo rende inapplicabile in contesti con spazi di azione continui o ad alta dimensionalità, dove il numero di combinazioni possibili diventa intrattabile. Per superare questo limite, si ricorre al [Deep Q-Network (DQN)](https://web.stanford.edu/class/psych209/Readings/MnihEtAlHassibis15NatureControlDeepRL.pdf), che sostituisce la Q-table con una rete neurale in grado di approssimare la funzione Q su spazi continui, rendendo possibile l'apprendimento in ambienti molto più complessi. Lo pseudocodice del DQN è il seguente:
 
 ```
@@ -383,6 +386,9 @@ Dopo i layer convoluzionali, l'output viene appiattito (`flatten`) in un unico v
 - Il **primo** riduce il vettore a **256 neuroni**, seguito da una `ReLU`.
 - Il **secondo** lo riduce ulteriormente a **64 neuroni**, anch'esso seguito da una `ReLU`.
 - Il **terzo e ultimo layer** produce in uscita `num_actions` valori (uno per ogni azione possibile dell'agente), senza attivazione, poiché questi valori rappresentano direttamente i **Q-value** stimati per ciascuna azione.
+
+### Double DQN
+
 
 <br><br>
 
