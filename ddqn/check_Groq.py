@@ -6,7 +6,7 @@ from monorepo import GroqLLM, load_api_keys
 def reward_llm(state, client, prompt, max_retries=8):
     full_prompt = f"{prompt}\n\nCURRENT STATE:\n{state}"
     
-    time.sleep(15)
+    time.sleep(5)
 
     for attempt in range(max_retries):
         try:
@@ -47,7 +47,7 @@ def reward_llm(state, client, prompt, max_retries=8):
 
 def analizza_log_episodi(prompt_path, log_path):
     load_api_keys()
-    client = GroqLLM(model_id= "openai/gpt-oss-120b")
+    client = GroqLLM(model_id= "qwen/qwen3.6-27b")
 
     if not os.path.exists(prompt_path):
         print(f"ERRORE: Il file di prompt '{prompt_path}' non esiste.")
@@ -88,7 +88,7 @@ def analizza_log_episodi(prompt_path, log_path):
     print("\n[FINE] Elaborazione di tutti gli step completata.")
 
 if __name__ == "__main__":
-    PROMPT_FILE = "prompt2.txt"
+    PROMPT_FILE = "prompt3.txt"
     LOG_FILE = "sequenza_passi_llm.txt"
 
     analizza_log_episodi(prompt_path=PROMPT_FILE, log_path=LOG_FILE)
