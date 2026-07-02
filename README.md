@@ -3,7 +3,7 @@
 ## Indice
 - [1. Reinforcement Learning](#1-reinforcement-learning)
   - [Conoscenza del Modello](#conoscenza-del-modello)
-- [2. Ambiente Doorkey](#2-ambiente-doorkey)
+- [2. Ambiente Door Key](#2-ambiente-door-key)
   - [Spazio delle azioni](#spazio-delle-azioni)
 - [3. Algoritmi: Q-Learning e SARSA (tabulare)](#3-algoritmi-q-learning-e-sarsa-tabulare)
   - [Q-Learning](#q-learning)
@@ -60,8 +60,8 @@ Le strategie per risolvere problemi di RL si dividono in due categorie principal
 
 ---
 
-## 2. Ambiente Doorkey
-Per valutare le performance dell'agente è stato scelto l'ambiente DoorKey, della libreria MiniGrid. Questo ambiente presenta una chiave che l'agente deve raccogliere per sbloccare la porta e successivamente deve arrivare al quadrato verde che rappresenta il goal finale. Infatti la missione di questo ambiente è riassunta come: "usa la chiave per aprire la porta e poi raggiungi il goal". Poiché la ricompensa viene fornita esclusivamente al completamento del task finale (ricompensa sparsa), l'ambiente rappresenta un'ottima sfida per testare le capacità di esplorazione dell'algoritmo.
+## 2. Ambiente Door Key
+Per valutare le performance dell'agente è stato scelto l'ambiente Door Key, della libreria MiniGrid. Questo ambiente presenta una chiave che l'agente deve raccogliere per sbloccare la porta e successivamente deve arrivare al quadrato verde che rappresenta il goal finale. Infatti la missione di questo ambiente è riassunta come: "usa la chiave per aprire la porta e poi raggiungi il goal". Poiché la ricompensa viene fornita esclusivamente al completamento del task finale (reward sparso), l'ambiente rappresenta un'ottima sfida per testare le capacità di esplorazione dell'algoritmo.
 
 <div align="center">
   <img src="figure/env.png" alt="Ambiente di gioco" width="200">
