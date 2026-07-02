@@ -388,7 +388,31 @@ Dopo i layer convoluzionali, l'output viene appiattito (`flatten`) in un unico v
 - Il **terzo e ultimo layer** produce in uscita `num_actions` valori (uno per ogni azione possibile dell'agente), senza attivazione, poiché questi valori rappresentano direttamente i **Q-value** stimati per ciascuna azione.
 
 ### Double DQN
-//TO DO 
+**Double DQN (DDQN)** è una variante migliorata del classico DQN. Il DQN standard tende a sovrastimare i Q-value durante il training, poiché utilizza la stessa rete sia per scegliere l'azione migliore nello stato successivo, sia per valutarne il Q-value. Questo fenomeno, noto come overestimation bias, porta a stime instabili e a un apprendimento più lento.
+ 
+Il Double DQN risolve questo problema separando i due ruoli tra due reti distinte:
+ 
+- La rete **online** (`dqn`) sceglie quale sia l'azione migliore nel prossimo stato.
+- La rete **target** (`dqn_target`) valuta il Q-value di quella specifica azione.
+
+Nel codice, questa logica è implementata nel ciclo di training in `train.py`:
+ 
+```python
+q_next_online = dqn(next_states_t)                    # rete online: sceglie l'azione
+best_actions = torch.argmax(q_next_online, dim=1)
+q_next_target = dqn_target(next_states_t)             # rete target: valuta l'azione
+q_next_value = q_next_target.gather(1, best_actions.unsqueeze(1)).squeeze(1)
+targets = reward_mb + gamma * q_next_value * (1 - done_mb)
+```
+ 
+La rete target viene sincronizzata con la rete online ogni `target_update_freq` step tramite un **hard update**, ovvero copiando direttamente i pesi:
+ 
+```python
+def hard_update(local_model, target_model):
+    target_model.load_state_dict(local_model.state_dict())
+```
+ 
+Questo disaccoppiamento riduce la sovrastima dei Q-value e garantisce un addestramento più stabile e affidabile.
 
 <br><br>
 
