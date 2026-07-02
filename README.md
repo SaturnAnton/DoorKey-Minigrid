@@ -33,31 +33,28 @@
 ---
 
 ## 1. Reinforcement Learning
-Il Reinforcement Learning (RL) è un paradigma dell'apprendimento automatico in cui un agente intelligente impara a prendere decisioni ottimali interagendo con un ambiente, con l'obiettivo di massimizzare un segnale di ricompensa cumulativo nel tempo.
- 
+Il Reinforcement Learning (RL) è un paradigma dell'apprendimento automatico in cui un agente intelligente impara a prendere decisioni ottimali interagendo con un ambiente, con l'obiettivo di massimizzare ricompensa.
+
 I concetti fondamentali del RL includono:
  
 - **Trial and error (Apprendimento per prove ed errori):** l'agente esplora l'ambiente in modo attivo, deducendo le strategie ottimali dalle conseguenze delle proprie azioni.
-- **Delayed reward (Ricompensa ritardata):** le azioni intraprese possono avere conseguenze e generare ricompense solo a lungo termine.
+- **Delayed reward (Ricompensa ritardata):** le azioni intraprese possono avere conseguenze a lungo termine.
 
-L'obiettivo formale del RL è la stima accurata della **funzione di valore** `V(s)` e l'individuazione della **policy ottima** `π*(s)`, ovvero la mappatura stato-azione che massimizza il valore atteso della ricompensa futura.
+L'obiettivo formale del RL è avere la stima della **funzione di valore** `V(s)` a lungo termine e l'individuazione della **policy ottimale** `π(s)`che permette di massimizzare la ricompensa attesa.
  
-Il problema è formalizzabile como un **Processo Decisionale di Markov (MDP)** in cui, a differenza della pianificazione classica:
+Il problema è formalizzabile come un **Markov Decision Process (MDP)** in cui, a differenza della pianificazione classica:
  
 - La funzione di ricompensa `R(s, a, s')` è incognita.
-- La probabilità di transizione tra stati `T(s, a, s')` (la dinamica dell'ambiente) sono incognite.
+- La probabilità di transizione tra stati `T(s, a, s')` sono incognite.
 
-Di conseguenza, l'agente deve acquisire campioni empirici provando azioni e raccogliendo le relative ricompense.
+Di conseguenza, l'agente deve provare ciascuna azione e raccogliere le relative ricompense.
  
 ### Conoscenza del Modello
  
 Le strategie per risolvere problemi di RL si dividono in due categorie principali:
- 
-| | Model-based | Model-free |
-|---|---|---|
-| **Approccio** | Stima esplicitamente il modello dell'ambiente (matrici di transizione e di ricompensa) | Apprende direttamente la Q-function e la policy ottima tramite l'esperienza |
-| **Vantaggi** | Maggiore efficienza di campionamento (sample efficiency); può pianificare riducendo l'interazione con stati negativi | Più semplice da implementare; bias inferiore |
-| **Svantaggi** | Computazionalmente più complesso | Richiede una maggiore quantità di dati per convergere |
+* **Model-based**: cercano di apprendere un modello dell'ambiente, evitano di ripetere stati/azioni negative, richiedono meno passaggi di esecuzione e utilizzano i dati in modo efficiente.
+* **Model-free**: cercano di apprendere direttamente la Q-function e la policy, si basano sulla semplicità cioè non è necessario cotruire e utilizzare un modello e presentano assenza di bias nella progettazione del modello.
+
 
 <br><br>
 
