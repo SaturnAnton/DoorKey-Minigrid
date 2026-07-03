@@ -95,7 +95,7 @@ Le azioni possibili all'interno di questo ambiente sono 7, identificate da un nu
 
 ### Q-Learning
  
-Il Q-Learning è il principale algoritmo **model-free** progettato per permettere a un agente di apprendere come comportarsi in modo ottimale interagendo direttamente con l'ambiente. L'obiettivo di questo algoritmo è quello di stiamre direttamente la Q-Function `Q(s,a)` senza conoscere in anticipo le dinamiche dell'ambiente.
+Il Q-Learning è il principale algoritmo **model-free** progettato per permettere a un agente di apprendere come comportarsi in modo ottimale interagendo direttamente con l'ambiente. L'obiettivo di questo algoritmo è quello di stimare direttamente la Q-Function `Q(s,a)` senza conoscere in anticipo le dinamiche dell'ambiente.
  
 $$Q_{k+1}(s,a) = \sum_{s'} T(s, a, s') \left( R(s, a, s') + \gamma \max_{a'} Q_k(s', a') \right)$$
 
