@@ -33,7 +33,7 @@
 ---
 
 ## 1. Reinforcement Learning
-Il Reinforcement Learning (RL) è un paradigma dell'apprendimento automatico in cui un agente intelligente impara a prendere decisioni ottimali interagendo con un ambiente, con l'obiettivo di massimizzare ricompensa.
+Il Reinforcement Learning (RL) è un paradigma dell'apprendimento automatico in cui un agente intelligente impara a prendere decisioni ottimali interagendo con un ambiente, con l'obiettivo di massimizzare la ricompensa.
 
 I concetti fondamentali del RL includono:
  
@@ -42,7 +42,7 @@ I concetti fondamentali del RL includono:
 
 L'obiettivo formale del RL è avere la stima della **funzione di valore** `V(s)` a lungo termine e l'individuazione della **policy ottimale** `π(s)`che permette di massimizzare la ricompensa attesa.
  
-Il problema è formalizzabile come un **Markov Decision Process (MDP)** in cui, a differenza della pianificazione classica:
+Il Reinforcement Learning è formalizzabile come un **Markov Decision Process (MDP)** in cui, a differenza della pianificazione classica:
  
 - La funzione di ricompensa `R(s, a, s')` è incognita.
 - La probabilità di transizione tra stati `T(s, a, s')` sono incognite.
@@ -65,7 +65,7 @@ Per valutare le performance dell'agente è stato scelto l'ambiente Door Key, del
 
 <div align="center">
   <img src="figure/env.png" alt="Ambiente di gioco" width="200">
-  <p><i>Visualizzazione dell'ambiente DoorKey in MiniGrid</i></p>
+  <p><i>Visualizzazione dell'ambiente Door Key in MiniGrid</i></p>
 </div>
 
 Il reward di questo ambiente può essere solo di due tipi:
@@ -97,24 +97,33 @@ Le azioni possibili all'interno di questo ambiente sono 7, identificate da un nu
 
 ### Q-Learning
  
-Il Q-Learning è il principale algoritmo **model-free** per il controllo ottimo. Permette di stimare direttamente i valori di `Q(s,a)` approssimando l'equazione di ottimalità di Bellman senza necessitare della dinamica dell'ambiente:
+Il Q-Learning è il principale algoritmo **model-free** progettato per permettere a un agente di apprendere come comportarsi in modo ottimale interagendo direttamente con l'ambiente. L'obiettivo di questo algoritmo è quello di stiamre direttamente la Q-Function `Q(s,a)` senza conoscere in anticipo le dinamiche dell'ambiente.
  
 $$Q_{k+1}(s,a) = \sum_{s'} T(s, a, s') \left( R(s, a, s') + \gamma \max_{a'} Q_k(s', a') \right)$$
+
+Questa equazione permette di torvare iterativamente i valori di Q ottimi.
  
 ### Sample-based Q-Learning
  
-Acquisendo una tupla di esperienza `(s, a, r, s')`, l'algoritmo aggiorna iterativamente la stima della funzione Q fondendo il valore storico con il nuovo target temporale (TD Target):
+Acquisendo il campione `(s, a, s', r)`, l'algoritmo aggiorna la Q-Function facendo riferimento alla vecchia stima `Q(s,a)` prendendo in considerazione il nuovo campione:
+
+$$sample = R(s, a, s') + \gamma \max_{a'} Q(s', a')$$
+
+Si incorpora la nuova stima in una running average:
  
-$$Q(s,a) \leftarrow Q(s,a) + \alpha \left( r + \gamma \max_{a'} Q(s', a') - Q(s,a) \right)$$
+$$Q(s, a) \leftarrow (1 - \alpha) Q(s, a) + \alpha \left( R(s, a, s') + \gamma \max_{a'} Q(s', a') \right)$$
+
+La variabile α rappresenta il **learning rate**, cioè il peso che viene dato al nuovo
+campione rispetto alla vecchia stima. Nel corso del tempo questo valore ciene decrementato per garantire la convergenza.
  
 ### Proprietà e Convergenza
  
-Il Q-Learning garantisce la convergenza asintotica alla reale funzione `Q*(s,a)` (e quindi alla policy ottima) sotto due condizioni fondamentali:
+Il Q-Learning garantisce la convergenza alla policy ottima se si verificano queste due condizioni fondamentali:
  
-- **Esplorazione adeguata:** ogni coppia stato-azione `(s,a)` deve essere visitata un numero infinitamente grande di volte.
+- **Esplorazione adeguata:** Ogni coppia stato-azione deve essere visitata un numero infinito di volte nel lungo periodo.
 - **Decadimento di α:** il learning rate deve diminuire progressivamente (es. `α = 1 / n(s,a)`).
 
-Il Q-Learning è intrinsecamente un algoritmo **Off-policy**: separa la policy usata per generare il comportamento (es. esplorazione epsilon-greedy) dalla policy che viene valutata e ottimizzata (puramente greedy, rappresentata dall'operatore `max_a'`).
+Il Q-Learning è un algoritmo **Off-policy**: separa la policy usata per generare il comportamento (es. esplorazione epsilon-greedy) dalla policy che viene valutata e ottimizzata (puramente greedy, rappresentata dall'operatore `max_a'`).
  
 ### Pseudocodice Q-Learning
  
@@ -136,13 +145,11 @@ Repeat (for each episode):
 
 ### SARSA
 
-SARSA è un algoritmo **on-policy** alternativo al Q-Learning per il model-free RL. Il nome deriva dalla tupla di esperienza che utilizza per l'aggiornamento: **(S, A, R, S', A')**.
+L'algoritmo SARSA prende il nome dalla tupla da cui deriva: `(S, A, R, S', A')`, ovvero stato, azione, ricompensa, stato successivo e azione successiva.
 
-La regola di aggiornamento è:
+La caratteristica principale di questo algoritmo è che il calcolo dell'azione successiva avviene seguendo la stessa politica che l'agente sta utilizzando per agire nell'ambiente: per questo motivo SARSA è definito un algoritmo on-policy.
 
-$$Q(S, A) \leftarrow Q(S, A) + \alpha \left[ R + \gamma Q(S', A') - Q(S, A) \right]$$
-
-La differenza chiave rispetto al Q-Learning è che **la prossima azione A' viene scelta seguendo la policy corrente** (es. ε-greedy), non prendendo il massimo. Per questo è detto on-policy.
+Se la politica converge, nel limite, verso la politica greedy (cioè quella che sceglie sempre l'azione con il valore massimo), e a condizione che ogni coppia stato-azione venga visitata infinite volte, allora SARSA garantisce la convergenza verso la funzione Q ottima, `Q*(s, a)`.
 
 #### Pseudocodice SARSA
 
