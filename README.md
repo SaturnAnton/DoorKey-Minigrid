@@ -7,16 +7,14 @@
   - [Spazio delle azioni](#spazio-delle-azioni)
 - [3. Algoritmi: Q-Learning e SARSA (tabulare)](#3-algoritmi-q-learning-e-sarsa-tabulare)
   - [Q-Learning](#q-learning)
-  - [Sample-based Q-Learning](#sample-based-q-learning)
-  - [Proprietà e Convergenza](#proprietà-e-convergenza)
-  - [Pseudocodice Q-Learning](#pseudocodice-q-learning)
+    - [Sample-based Q-Learning](#sample-based-q-learning)
+    - [Proprietà e Convergenza](#proprietà-e-convergenza)
+    - [Pseudocodice Q-Learning](#pseudocodice-q-learning)
   - [SARSA](#sarsa)
     - [Pseudocodice SARSA](#pseudocodice-sarsa)
     - [Convergenza](#convergenza)
-    - [SARSA vs Q-Learning](#sarsa-vs-q-learning)
+  - [SARSA vs Q-Learning](#sarsa-vs-q-learning)
   - [Esplorazione vs Sfruttamento](#esplorazione-vs-sfruttamento)
-    - [ε-greedy](#ε-greedy)
-    - [Softmax (Boltzmann)](#softmax-boltzmann)
   - [Parametri](#parametri)
   - [Setup dell'addestramento](#setup-delladdestramento)
   - [Training Q-Learning](#training-q-learning)
@@ -103,7 +101,7 @@ $$Q_{k+1}(s,a) = \sum_{s'} T(s, a, s') \left( R(s, a, s') + \gamma \max_{a'} Q_k
 
 Questa equazione permette di torvare iterativamente i valori di Q ottimi.
  
-### Sample-based Q-Learning
+#### Sample-based Q-Learning
  
 Acquisendo il campione `(s, a, s', r)`, l'algoritmo aggiorna la Q-Function facendo riferimento alla vecchia stima `Q(s,a)` prendendo in considerazione il nuovo campione:
 
@@ -116,7 +114,7 @@ $$Q(s, a) \leftarrow (1 - \alpha) Q(s, a) + \alpha \left( R(s, a, s') + \gamma \
 La variabile α rappresenta il **learning rate**, cioè il peso che viene dato al nuovo
 campione rispetto alla vecchia stima. Nel corso del tempo questo valore ciene decrementato per garantire la convergenza.
  
-### Proprietà e Convergenza
+#### Proprietà e Convergenza
  
 Il Q-Learning garantisce la convergenza alla policy ottima se si verificano queste due condizioni fondamentali:
  
@@ -125,7 +123,7 @@ Il Q-Learning garantisce la convergenza alla policy ottima se si verificano ques
 
 Il Q-Learning è un algoritmo **Off-policy**: separa la policy usata per generare il comportamento (es. esplorazione epsilon-greedy) dalla policy che viene valutata e ottimizzata (puramente greedy, rappresentata dall'operatore `max_a'`).
  
-### Pseudocodice Q-Learning
+#### Pseudocodice Q-Learning
  
 ```
 Initialize Q(s, a) arbitrarily for all s in S, a in A(s)
@@ -149,8 +147,6 @@ L'algoritmo SARSA prende il nome dalla tupla da cui deriva: `(S, A, R, S', A')`,
 
 La caratteristica principale di questo algoritmo è che il calcolo dell'azione successiva avviene seguendo la stessa politica che l'agente sta utilizzando per agire nell'ambiente: per questo motivo SARSA è definito un algoritmo on-policy.
 
-Se la politica converge, nel limite, verso la politica greedy (cioè quella che sceglie sempre l'azione con il valore massimo), e a condizione che ogni coppia stato-azione venga visitata infinite volte, allora SARSA garantisce la convergenza verso la funzione Q ottima, `Q*(s, a)`.
-
 #### Pseudocodice SARSA
 
 ```
@@ -167,12 +163,10 @@ Repeat (for each episode):
     S <- S'; A <- A'
   until S is terminal
 ```
+#### Convergenza
+Se la politica converge, nel limite, verso la politica greedy (cioè quella che sceglie sempre l'azione con il valore massimo), e a condizione che ogni coppia stato-azione venga visitata infinite volte, allora SARSA garantisce la convergenza verso la funzione Q ottima, `Q*(s, a)`.
 
-##### Convergenza
-
-SARSA converge alla policy ottima `Q*(s, a)` se, nel limite, la policy converge alla policy greedy **e** tutte le coppie stato-azione vengono visitate infinite volte.
-
-##### SARSA vs Q-Learning
+### SARSA vs Q-Learning
 
 | | Q-Learning | SARSA |
 |---|---|---|
@@ -192,23 +186,17 @@ Un pilastro fondamentale del Reinforcement Learning è il delicato compromesso t
 - **Sfruttamento:** l'agente sceglie le azioni che hanno dato buoni risultati in passato per ottenere ricompense immediate e sicure.
 
 Per garantire la convergenza a un risultato ottimo, è necessario esplorare tutte le coppie stato-azione con sufficiente frequenza nel lungo periodo. I principali metodi utilizzati nella pratica sono:
- 
-#### ε-greedy
- 
-Scegliere l'azione in modo greedy per la maggior parte del tempo (con probabilità `1 - ε`) e selezionare un'azione casuale con probabilità `ε`.
- 
-#### Softmax (Boltzmann)
- 
-Assegna una probabilità di selezione a ciascuna azione ponderandola in base al suo valore atteso `Q(s,a)`. La probabilità di scegliere l'azione `a` nello stato `s` è:
- 
-$$p(a) = \frac{e^{Q(s,a)/T}}{\sum_{a'} e^{Q(s,a')/T}}$$
- 
-Il parametro **T** (temperatura) agisce da modulatore del grado di esplorazione:
- 
-| Temperatura | Comportamento |
-|-------------|---------------|
-| T elevata   | Tutte le azioni hanno probabilità simili → **massima esplorazione** |
-| T bassa     | L'azione con Q più alto ha probabilità maggiore → **massimo sfruttamento** |
+- **ε-greedy**: Scegliere l'azione in modo greedy per la maggior parte del tempo (con probabilità `1 - ε`) e selezionare un'azione casuale con probabilità `ε`. Questo metodo è off-policy.
+- **Softmax**: Viene scelta una azione `a` con una probabilità:
+
+  $$p(a) = \frac{e^{Q(s,a)/T}}{\sum_{a'} e^{Q(s,a')/T}}$$
+
+  Il parametro **T** (temperatura) agisce da modulatore del grado di esplorazione:
+
+  | Temperatura | Comportamento |
+  |-------------|---------------|
+  | T elevata   | Tutte le azioni hanno probabilità simili → **massima esplorazione** |
+  | T bassa     | L'azione con Q più alto ha probabilità maggiore → **massimo sfruttamento** |
  
 ### Parametri
  
