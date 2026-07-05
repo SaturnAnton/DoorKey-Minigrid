@@ -452,22 +452,6 @@ Per questo motivo si è scelto di utilizzare i risultati del training della rete
 
 Grazie a queste modifiche, si è ottenuto il valore esatto del reward denso per ogni singolo step già alla prima esecuzione. Proseguendo con le simulazioni, tuttavia, è emerso che i risultati non erano sempre corretti. Si è quindi deciso di utilizzare lo stesso prompt e la stessa rappresentazione con modelli diversi: a differenza del primo modello, che era riuscito almeno una volta a ottenere tutti gli step corretti, gli altri modelli hanno presentato, in ogni episodio, almeno uno step con un risultato errato.
 
-| Modello         | Step corretti | Episodi corretti | % successo step | % successo episodi |
-|------------------|:---------------:|:-------------------:|:------------------:|:----------------------:|
-| gpt-oss-120b     |    42/52        |     1/4            |            81%        |        25%             |
-| llama-3.3-70b-versatile        |        /39       |         0/3             |                  |              0%           |
-| qwen3-32b        |           /52     |          0/4       |                    |        0%              |
-| quen3.6-27b        |         /52       |       0/4          |                    |       0%              |
-| zai-glm-4.7        |         /52      |      0/4           |                    |       0%               |
-
 Per questo motivo, il prompt è stato ulteriormente modificato, specificando in maniera più dettagliata la situazione che generava il maggior numero di problemi, ossia il momento in cui l'agente apriva la porta. Una volta implementato il nuovo prompt, sono stati eseguiti nuovamente i test su tutti i modelli analizzati in precedenza: il modello gpt-oss-120b ha ottenuto sempre risultati corretti per ogni step di ogni episodio, mentre tutti gli altri modelli, così come con il prompt precedente, hanno continuato a presentare almeno un risultato errato nel reward per almeno uno step per episodio.
-
-| Modello         | Step corretti | Episodi corretti | % successo step | % successo episodi |
-|------------------|:---------------:|:-------------------:|:------------------:|:----------------------:|
-| gpt-oss-120b     |       52/52         |           4/4        |      100%          |       100%             |
-| llama-3.3-70b-versatile        |      /52         |         0/4             |                  |              0%           |
-| qwen3-32b        |        /52        |          0/4       |                    |        0%              |
-| quen3.6-27b        |       /39         |       0/3          |                    |       0%              |
-| zai-glm-4.7        |        /26       |      0/2           |                    |       0%               |
 
 Dai test condotti si può quindi concludere che questo tipo di task può essere risolto efficacemente solo da un modello particolarmente potente: modelli con un numero inferiore di parametri tendono infatti a commettere errori in almeno uno step.
