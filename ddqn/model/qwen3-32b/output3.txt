@@ -219,7 +219,7 @@ AVVIO VALUTAZIONE LOG CON LLM LOCALE
 +---+---+---+---+---+---+---+---+
 | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ |
 +---+---+---+---+---+---+---+---+
--> OLLAMA DENSE REWARD: 0.3333333333
+-> OLLAMA DENSE REWARD: 2.0
 ----------------------------------------
 
 [ANALISI] Inviando Step 10 all'LLM...

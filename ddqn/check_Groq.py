@@ -47,7 +47,7 @@ def reward_llm(state, client, prompt, max_retries=8):
 
 def analizza_log_episodi(prompt_path, log_path):
     load_api_keys()
-    client = GroqLLM(model_id= "llama-3.3-70b-versatile")
+    client = GroqLLM(model_id= "qwen/qwen3.6-27b")
 
     if not os.path.exists(prompt_path):
         print(f"ERRORE: Il file di prompt '{prompt_path}' non esiste.")
@@ -88,7 +88,7 @@ def analizza_log_episodi(prompt_path, log_path):
     print("\n[FINE] Elaborazione di tutti gli step completata.")
 
 if __name__ == "__main__":
-    PROMPT_FILE = "prompt2.txt"
+    PROMPT_FILE = "prompt3.txt"
     LOG_FILE = "sequenza_passi_llm.txt"
 
     analizza_log_episodi(prompt_path=PROMPT_FILE, log_path=LOG_FILE)

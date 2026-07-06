@@ -21,7 +21,7 @@ AVVIO VALUTAZIONE LOG CON LLM LOCALE
 +---+---+---+---+---+---+---+---+
 | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ |
 +---+---+---+---+---+---+---+---+
--> OLLAMA DENSE REWARD: 1.0
+-> OLLAMA DENSE REWARD: 0.125
 ----------------------------------------
 
 [ANALISI] Inviando Step 1 all'LLM...
@@ -43,7 +43,7 @@ AVVIO VALUTAZIONE LOG CON LLM LOCALE
 +---+---+---+---+---+---+---+---+
 | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ |
 +---+---+---+---+---+---+---+---+
--> OLLAMA DENSE REWARD: 1.0
+-> OLLAMA DENSE REWARD: 0.2
 ----------------------------------------
 
 [ANALISI] Inviando Step 2 all'LLM...
@@ -65,7 +65,7 @@ AVVIO VALUTAZIONE LOG CON LLM LOCALE
 +---+---+---+---+---+---+---+---+
 | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ |
 +---+---+---+---+---+---+---+---+
--> OLLAMA DENSE REWARD: 13.0
+-> OLLAMA DENSE REWARD: 0.125
 ----------------------------------------
 
 [ANALISI] Inviando Step 3 all'LLM...
@@ -87,7 +87,7 @@ AVVIO VALUTAZIONE LOG CON LLM LOCALE
 +---+---+---+---+---+---+---+---+
 | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ |
 +---+---+---+---+---+---+---+---+
--> OLLAMA DENSE REWARD: 2.0
+-> OLLAMA DENSE REWARD: 0.125
 ----------------------------------------
 
 [ANALISI] Inviando Step 4 all'LLM...
@@ -109,7 +109,7 @@ AVVIO VALUTAZIONE LOG CON LLM LOCALE
 +---+---+---+---+---+---+---+---+
 | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ |
 +---+---+---+---+---+---+---+---+
--> OLLAMA DENSE REWARD: 0.5
+-> OLLAMA DENSE REWARD: 0.125
 ----------------------------------------
 
 [ANALISI] Inviando Step 5 all'LLM...
@@ -131,7 +131,7 @@ AVVIO VALUTAZIONE LOG CON LLM LOCALE
 +---+---+---+---+---+---+---+---+
 | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ |
 +---+---+---+---+---+---+---+---+
--> OLLAMA DENSE REWARD: 1.0
+-> OLLAMA DENSE REWARD: 0.2
 ----------------------------------------
 
 [ANALISI] Inviando Step 6 all'LLM...
@@ -153,7 +153,7 @@ AVVIO VALUTAZIONE LOG CON LLM LOCALE
 +---+---+---+---+---+---+---+---+
 | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ |
 +---+---+---+---+---+---+---+---+
--> OLLAMA DENSE REWARD: 1.0
+-> OLLAMA DENSE REWARD: 0.2
 ----------------------------------------
 
 [ANALISI] Inviando Step 7 all'LLM...
@@ -175,7 +175,7 @@ AVVIO VALUTAZIONE LOG CON LLM LOCALE
 +---+---+---+---+---+---+---+---+
 | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ |
 +---+---+---+---+---+---+---+---+
--> OLLAMA DENSE REWARD: 0.2
+-> OLLAMA DENSE REWARD: 0.125
 ----------------------------------------
 
 [ANALISI] Inviando Step 8 all'LLM...
@@ -197,7 +197,7 @@ AVVIO VALUTAZIONE LOG CON LLM LOCALE
 +---+---+---+---+---+---+---+---+
 | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ |
 +---+---+---+---+---+---+---+---+
--> OLLAMA DENSE REWARD: 0.25
+-> OLLAMA DENSE REWARD: 0.125
 ----------------------------------------
 
 [ANALISI] Inviando Step 9 all'LLM...
@@ -219,7 +219,7 @@ AVVIO VALUTAZIONE LOG CON LLM LOCALE
 +---+---+---+---+---+---+---+---+
 | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ |
 +---+---+---+---+---+---+---+---+
--> OLLAMA DENSE REWARD: 0.3333333333333333
+-> OLLAMA DENSE REWARD: 0.125
 ----------------------------------------
 
 [ANALISI] Inviando Step 10 all'LLM...
@@ -241,7 +241,7 @@ AVVIO VALUTAZIONE LOG CON LLM LOCALE
 +---+---+---+---+---+---+---+---+
 | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ |
 +---+---+---+---+---+---+---+---+
--> OLLAMA DENSE REWARD: 0.5
+-> OLLAMA DENSE REWARD: 0.14285714285714285
 ----------------------------------------
 
 [ANALISI] Inviando Step 11 all'LLM...
@@ -263,7 +263,7 @@ AVVIO VALUTAZIONE LOG CON LLM LOCALE
 +---+---+---+---+---+---+---+---+
 | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ |
 +---+---+---+---+---+---+---+---+
--> OLLAMA DENSE REWARD: 5.0
+-> OLLAMA DENSE REWARD: 0.14285714285714285
 ----------------------------------------
 
 [ANALISI] Inviando Step 12 all'LLM...
@@ -285,7 +285,7 @@ AVVIO VALUTAZIONE LOG CON LLM LOCALE
 +---+---+---+---+---+---+---+---+
 | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ | ▇ |
 +---+---+---+---+---+---+---+---+
--> OLLAMA DENSE REWARD: 1.0
+-> OLLAMA DENSE REWARD: 0.125
 ----------------------------------------
 
 [FINE] Elaborazione di tutti gli step completata.
