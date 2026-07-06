@@ -416,7 +416,7 @@ Questo disaccoppiamento riduce la sovrastima dei Q-value e garantisce un addestr
 
 Per superare il problema del reward sparso (nello scenario di default il reward veniva assegnato solo al raggiungimento del goal o al superamento del limite massimo di passi), si è deciso di integrare modelli linguistici e di visione (LLM e VLM) all'interno del loop di training della Double DQN. L'obiettivo è generare un reward denso a ogni singolo step di ciascun episodio, guidando l'agente in modo più efficace.
 
-Il processo di sviluppo ha seguito un'evoluzione iterativa per ottimizzare tempi di risposta e vincoli di computazione:
+Il processo di sviluppo ha seguito un'evoluzione iterativa per ottimizzare tempi di risposta e vincoli di computazione.
 
 ### Evoluzione dell'Architettura
 
