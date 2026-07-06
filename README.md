@@ -448,7 +448,7 @@ Per questo motivo si è scelto di utilizzare i risultati del training della rete
   - `G` = il goal (Goal)
   - `▇` = muro, non attraversabile (Wall)
   - ` ` = spazio vuoto (Empty space)
-- **Prompt**: è stato adattato sulla base delle modifiche apportate alla rappresentazione dell'ambiente.
+- [**Prompt**](./ddqn/prompt2.txt): è stato adattato sulla base delle modifiche apportate alla rappresentazione dell'ambiente.
 
 Grazie a queste modifiche, si è ottenuto il valore esatto del reward denso per ogni singolo step già alla prima esecuzione. Proseguendo con le simulazioni, tuttavia, è emerso che i risultati non erano sempre corretti. Si è quindi deciso di utilizzare lo stesso prompt e la stessa rappresentazione con modelli diversi: a differenza dei modelli `gpt-oss-120b` e `qwen3-32b`, che sono riusciti almeno una volta a ottenere tutti gli step corretti, gli altri modelli hanno presentato, in ogni episodio, almeno uno step con un risultato errato.
 
@@ -460,7 +460,7 @@ Grazie a queste modifiche, si è ottenuto il valore esatto del reward denso per 
 | qwen3.6-27b      | 35/52            | 0/4                 | 67%                 | 0%                     |
 | zai-glm-4.7     | 30/52            | 0/4                 | 58%                 | 0%                     |
 
-Per questo motivo, il prompt è stato ulteriormente modificato, specificando in maniera più dettagliata la situazione che generava il maggior numero di problemi, ossia il momento in cui l'agente apriva la porta. Una volta implementato il nuovo prompt, sono stati eseguiti nuovamente i test su tutti i modelli analizzati in precedenza: il modello `gpt-oss-120b` ha ottenuto sempre risultati corretti per ogni step di ogni episodio,anche `qwen3-32b` ha ottenuto ottimi risultati, mentre tutti gli altri modelli, così come con il prompt precedente, hanno continuato a presentare almeno un risultato errato nel reward per almeno uno step per episodio.
+Per questo motivo, il [prompt](./ddqn/prompt3.txt) è stato ulteriormente modificato, specificando in maniera più dettagliata la situazione che generava il maggior numero di problemi, ossia il momento in cui l'agente apriva la porta. Una volta implementato il nuovo prompt, sono stati eseguiti nuovamente i test su tutti i modelli analizzati in precedenza: il modello `gpt-oss-120b` ha ottenuto sempre risultati corretti per ogni step di ogni episodio,anche `qwen3-32b` ha ottenuto ottimi risultati, mentre tutti gli altri modelli, così come con il prompt precedente, hanno continuato a presentare almeno un risultato errato nel reward per almeno uno step per episodio.
 
 | Modello       | Step corretti | Episodi corretti | % successo step | % successo episodi |
 |----------------|:---------------:|:-------------------:|:------------------:|:----------------------:|
