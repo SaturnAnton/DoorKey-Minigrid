@@ -439,7 +439,7 @@ Nonostante il tempo di risposta molto basso per ogni step, eseguire un training 
 
 Per questo motivo si è scelto di utilizzare i risultati del training della rete neurale, salvando su un file esterno l'immagine dell'ambiente per ogni step, e di applicare successivamente l'LLM a un numero ristretto di step, selezionati tra quelli che conducevano al goal. Fatto ciò, sono stati modificati i tre aspetti indicati in precedenza:
 
-- **Modello**: è stato impiegato il modello più potente a disposizione (gpt-oss-120b), al fine di garantire una maggiore affidabilità nei risultati ottenuti.
+- **Modello**: è stato impiegato il modello più potente a disposizione (`gpt-oss-120b`), al fine di garantire una maggiore affidabilità nei risultati ottenuti.
 - **Rappresentazione dell'ambiente**: l'ambiente viene rappresentato tramite caratteri specifici, secondo la seguente legenda:
   - `A` = agente senza la chiave (Agent without the key)
   - `L` = agente con la chiave (Loaded)
@@ -452,6 +452,6 @@ Per questo motivo si è scelto di utilizzare i risultati del training della rete
 
 Grazie a queste modifiche, si è ottenuto il valore esatto del reward denso per ogni singolo step già alla prima esecuzione. Proseguendo con le simulazioni, tuttavia, è emerso che i risultati non erano sempre corretti. Si è quindi deciso di utilizzare lo stesso prompt e la stessa rappresentazione con modelli diversi: a differenza del primo modello, che era riuscito almeno una volta a ottenere tutti gli step corretti, gli altri modelli hanno presentato, in ogni episodio, almeno uno step con un risultato errato.
 
-Per questo motivo, il prompt è stato ulteriormente modificato, specificando in maniera più dettagliata la situazione che generava il maggior numero di problemi, ossia il momento in cui l'agente apriva la porta. Una volta implementato il nuovo prompt, sono stati eseguiti nuovamente i test su tutti i modelli analizzati in precedenza: il modello gpt-oss-120b ha ottenuto sempre risultati corretti per ogni step di ogni episodio, mentre tutti gli altri modelli, così come con il prompt precedente, hanno continuato a presentare almeno un risultato errato nel reward per almeno uno step per episodio.
+Per questo motivo, il prompt è stato ulteriormente modificato, specificando in maniera più dettagliata la situazione che generava il maggior numero di problemi, ossia il momento in cui l'agente apriva la porta. Una volta implementato il nuovo prompt, sono stati eseguiti nuovamente i test su tutti i modelli analizzati in precedenza: il modello `gpt-oss-120b` ha ottenuto sempre risultati corretti per ogni step di ogni episodio, mentre tutti gli altri modelli, così come con il prompt precedente, hanno continuato a presentare almeno un risultato errato nel reward per almeno uno step per episodio.
 
 Dai test condotti si può quindi concludere che questo tipo di task può essere risolto efficacemente solo da un modello particolarmente potente: modelli con un numero inferiore di parametri tendono infatti a commettere errori in almeno uno step.
