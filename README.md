@@ -411,18 +411,10 @@ Il processo di sviluppo ha seguito un'evoluzione iterativa per ottimizzare tempi
 
 ### Evoluzione dell'Architettura
 
-* **1. VLM Locale (Approccio Iniziale)**
-    * Tentativo: Installazione di una VLM locale per testarne le capacità di analisi visiva dell'ambiente.
-    * Criticità: Tempi di inferenza eccessivamente lunghi, anche dopo aver effettuato il downgrade a un modello più leggero.
-* **2. VLM Cloud via Groq**
-    * Tentativo: Migrazione a un provider esterno (Groq) per sfruttare l'accelerazione hardware e ridurre la latenza.
-    * Criticità: Sebbene il tempo di risposta fosse migliorato, i limiti di Token Per Minute (TPM) e Request Per Minute (RPM) del piano gratuito hanno rallentato drasticamente il training globale.
-* **3. Transizione a LLM Cloud via Cerebras**
-    * Tentativo: Switch da VLM (Vision) a LLM (Text-only) per ridurre il consumo di token, permettendo l'esecuzione di un numero maggiore di episodi.
-    * Criticità: La dipendenza da API esterne esponeva comunque il sistema a limitazioni tariffarie giornaliere e orarie (Rate Limiting).
-* **4. LLM Locale via Ollama**
-    * Tentativo: Configurazione di un modello linguistico locale per eliminare la dipendenza dai provider esterni e sbloccare un training continuo senza limiti di richieste. L'integrazione finale tramite Ollama ha abbattuto i tempi di risposta da ~2.0 secondi a soli 0.2 secondi per step.
-    * Criticità: L'abbassamento del tempo di risposta per ogni step non permette di concludere un training in tempi ragionevoli.
+* **1. VLM Locale**: L’installazione di una VLM locale ha presentato fin da subito una criticità, cioè il lungo tempo di risposta per una singola chiamata. La situazione non è migliorata nemmeno con l’utilizzo di un modello più leggero.
+* **2. VLM Cloud via Groq**: Utilizzando un provider esterno si va a ridurre il tempo di risposta per la singola chiamata. Ciò che rallenta drasticamente il training sono i limiti di Token Per Minute (TPM) e Request Per Minute (RPM).
+* **3. Transizione a LLM Cloud via Cerebras**: Il passaggio da VLM a LLM permette di ridurre il consumo di token, permettendo l’esecuzione di un numero maggiore di episodi. Il problema rimane sempre il limite di richieste per minuto o per ora.
+* **4. LLM Locale via Ollama**: L’installazione di una LLM locale con Ollama permette di eseguire chiamate senza nessun tipo di limite. Questa modifica permette anche di abbassare il tempo di risposta da ~2.0 secondi a soli 0.2 secondi per step ma questo non basta per eseguire un intero training in tempi ragionevoli.
  
 ### Analisi di un singolo episodio vincente
 
