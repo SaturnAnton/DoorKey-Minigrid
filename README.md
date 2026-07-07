@@ -420,9 +420,9 @@ Il processo di sviluppo ha seguito un'evoluzione iterativa per ottimizzare tempi
 * **3. Transizione a LLM Cloud via Cerebras**
     * Tentativo: Switch da VLM (Vision) a LLM (Text-only) per ridurre il consumo di token, permettendo l'esecuzione di un numero maggiore di episodi.
     * Criticità: La dipendenza da API esterne esponeva comunque il sistema a limitazioni tariffarie giornaliere e orarie (Rate Limiting).
-* **4. LLM Locale e l'Ottimizzazione con Ollama**
-    * Soluzione Finale: Configurazione di un modello linguistico locale per eliminare la dipendenza dai provider esterni e sbloccare un training continuo senza limiti di richieste.
-    * Risultato: L'integrazione finale tramite Ollama ha abbattuto i tempi di risposta da ~2.0 secondi a soli 0.2 secondi per step. Questo incremento prestazionale ha permesso di scalare notevolmente il numero di episodi completati nell'unità di tempo.
+* **4. LLM Locale via Ollama**
+    * Tentativo: Configurazione di un modello linguistico locale per eliminare la dipendenza dai provider esterni e sbloccare un training continuo senza limiti di richieste. L'integrazione finale tramite Ollama ha abbattuto i tempi di risposta da ~2.0 secondi a soli 0.2 secondi per step.
+    * Criticità: L'abbassamento del tempo di risposta per ogni step non permette di concludere un training in tempi ragionevoli.
  
 ### Analisi di un singolo episodio vincente
 
