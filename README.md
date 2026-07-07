@@ -168,15 +168,6 @@ Repeat (for each episode):
 Se la politica converge, nel limite, verso la politica greedy (cioè quella che sceglie sempre l'azione con il valore massimo), e a condizione che ogni coppia stato-azione venga visitata infinite volte, allora SARSA garantisce la convergenza verso la funzione Q ottima, `Q*(s, a)`.
 
 ### SARSA vs Q-Learning
-
-| | Q-Learning | SARSA |
-|---|---|---|
-| **Tipo** | Off-policy | On-policy |
-| **Aggiornamento** | Usa `max_a' Q(S', a')` | Usa `Q(S', A')` con A' dalla policy |
-| **Policy ottima** | Sì, la impara direttamente | Sì, ma solo se la policy converge a greedy |
-| **Performance online** | Peggiore | Migliore |
-| **Rischio** | Può fallire occasionalmente con ε-greedy | Più cauto, evita azioni rischiose |
-
 Il classico esempio del **Cliff Walking** mostra questa differenza: Q-Learning impara il percorso ottimo teorico ma ci cade occasionalmente a causa dell'esplorazione ε-greedy, mentre SARSA apprende un percorso leggermente più lungo ma più sicuro, ottenendo una ricompensa cumulativa migliore durante il training.
  
 ### Esplorazione vs Sfruttamento
